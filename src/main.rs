@@ -58,7 +58,16 @@ impl Level {
     fn update(&mut self, point: Point, cell: Cell) {
         self.data.insert(point.clone(), cell.clone());
     }
-
+    fn door_position(&self, switch_id: u8) -> Option<Point> {
+        for (&point, &cell) in self.data.iter() {
+            if let Cell::Door(door_id) = cell {
+                if door_id == switch_id {
+                    return Some(point);
+                }
+            }
+        }
+        None
+    }
     fn finish_position(&self) -> Option<Point> {
         for (&point, &cell) in self.data.iter() {
             if cell == Cell::Exit {
@@ -85,13 +94,22 @@ impl Level {
             && new_position.y <= max_y
         {
             println!("{:?}", new_position);
-            // Handle collosions here
-            match self.data.get(&new_position) {
+            // Handle collosions here that will not reset the level
+            match self.data.get(&new_position).cloned() {
                 Some(cell) => match cell {
                     // moved on empty space
                     Cell::Empty => {
                         self.update(player, Cell::Empty);
                         self.update(new_position, Cell::Player);
+                    }
+
+                    // Triggering a switch removes the switch and the related door
+                    Cell::Switch(switch_id) => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Player);
+                        if let Some(door_position) = self.door_position(switch_id) {
+                            self.update(door_position, Cell::Empty);
+                        }
                     }
                     // everything else can not be passed
                     _ => {}
