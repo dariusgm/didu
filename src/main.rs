@@ -6,7 +6,7 @@ use crossterm::{
     event::Event as Event_,
     event::KeyCode as KeyCode_,
     queue,
-    style::{Color, Print, ResetColor, SetForegroundColor},
+    style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::enable_raw_mode,
     terminal::{self, ClearType},
     ExecutableCommand, Result,
@@ -18,8 +18,10 @@ enum Cell {
     Empty,
     Player,
     Exit,
-    Wall,
+    HorizontalWall,
+    VerticalWall,
     Enemy,
+    Void,
 }
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash)]
@@ -138,6 +140,20 @@ fn level_2() -> Level {
     let mut level_data = Level::empty(5, 5);
     level_data.update(Point { x: 0, y: 4 }, Cell::Player);
     level_data.update(Point { x: 4, y: 4 }, Cell::Exit);
+
+    level_data.update(Point { x: 1, y: 1 }, Cell::VerticalWall);
+    level_data.update(Point { x: 1, y: 2 }, Cell::VerticalWall);
+    level_data.update(Point { x: 1, y: 3 }, Cell::VerticalWall);
+    level_data.update(Point { x: 1, y: 4 }, Cell::VerticalWall);
+
+    level_data.update(Point { x: 3, y: 1 }, Cell::VerticalWall);
+    level_data.update(Point { x: 3, y: 2 }, Cell::VerticalWall);
+    level_data.update(Point { x: 3, y: 3 }, Cell::VerticalWall);
+    level_data.update(Point { x: 3, y: 4 }, Cell::VerticalWall);
+
+    level_data.update(Point { x: 2, y: 2 }, Cell::Void);
+    level_data.update(Point { x: 2, y: 3 }, Cell::Void);
+    level_data.update(Point { x: 2, y: 4 }, Cell::Void);
     level_data
 }
 
@@ -153,12 +169,13 @@ impl Drawing {
         }
     }
 
-    fn flush(&mut self) {
-        self.stdout.flush();
+    fn flush(&mut self) -> Result<()> {
+        self.stdout.flush()
     }
 
-    fn init(&mut self) {
-        self.stdout.execute(cursor::Hide);
+    fn init(&mut self) -> Result<()> {
+        self.stdout.execute(cursor::Hide)?;
+        Ok(())
     }
     fn reset(&mut self) -> Result<()> {
         self.stdout.execute(cursor::Show)?;
@@ -209,6 +226,20 @@ impl Drawing {
                     self.stdout.execute(SetForegroundColor(Color::Green))?;
                     print!("X");
                 }
+                Cell::Void => {
+                    self.stdout.execute(SetForegroundColor(Color::Black))?;
+                    print!(" ");
+                }
+                Cell::VerticalWall => {
+                    self.stdout.execute(SetForegroundColor(Color::Grey))?;
+                    self.stdout.execute(SetBackgroundColor(Color::Red))?;
+                    print!("|");
+                }
+                Cell::HorizontalWall => {
+                    self.stdout.execute(SetForegroundColor(Color::Grey))?;
+                    self.stdout.execute(SetBackgroundColor(Color::Red))?;
+                    print!("-");
+                }
                 _ => {}
             }
             self.stdout.execute(ResetColor)?;
@@ -223,11 +254,12 @@ fn main() -> Result<()> {
     let mut level = level_2();
     let level_start = Instant::now();
     let (max_x, max_y) = level.size();
-    drawing.init();
+    drawing.init()?;
     let mut run = true;
     while run {
         drawing.draw_level(&level)?;
         drawing.draw_ui(1, level_start.elapsed().as_secs() as u128, 0)?;
+        drawing.flush()?;
 
         let player_point = &level.player_position();
 
@@ -293,9 +325,9 @@ fn main() -> Result<()> {
 
             None => print!("Game Over"),
         }
-        drawing.flush();
+        // drawing.flush()?;
     }
     drawing.reset()?;
-    drawing.flush();
+    drawing.flush()?;
     Ok(())
 }
