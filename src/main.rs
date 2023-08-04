@@ -5,13 +5,14 @@ use crossterm::{
     event::read as read_event,
     event::Event as Event_,
     event::KeyCode as KeyCode_,
-    style::{Color, ResetColor, SetForegroundColor},
+    queue,
+    style::{Color, Print, ResetColor, SetForegroundColor},
     terminal::enable_raw_mode,
     terminal::{self, ClearType},
     ExecutableCommand, Result,
 };
 use std::{collections::HashMap, io::Stdout, time::Duration};
-
+use std::{io::Write, time::Instant};
 #[derive(Clone, PartialEq, Copy, Eq, Hash)]
 enum Cell {
     Empty,
@@ -57,6 +58,7 @@ impl Level {
 
         Self { data }
     }
+
     fn update(&mut self, point: Point, cell: Cell) {
         self.data.insert(point.clone(), cell.clone());
     }
@@ -133,6 +135,32 @@ fn level_1() -> Level {
     level_data
 }
 
+fn draw_ui(level_number: u32, elapsed_time: u128, score: u32, mut stdout: &Stdout) -> Result<()> {
+    let (_, terminal_height) = crossterm::terminal::size()?;
+
+    // Calculate status bar position
+    let status_bar_position = terminal_height as usize - 1;
+
+    // Clear the status bar line
+    queue!(
+        stdout,
+        MoveTo(0, status_bar_position as u16),
+        crossterm::terminal::Clear(crossterm::terminal::ClearType::CurrentLine),
+    )?;
+
+    // Print status bar
+    queue!(
+        stdout,
+        MoveTo(0, status_bar_position as u16),
+        Print(format!(
+            "Level: {}, Time: {}, Score: {}",
+            level_number, elapsed_time, score
+        )),
+    )?;
+
+    stdout.flush()?;
+    Ok(())
+}
 fn draw_level(level: &Level, mut stdout: &Stdout) -> Result<()> {
     stdout.execute(terminal::Clear(ClearType::All))?;
     for (point, cell) in level.data.iter() {
@@ -161,11 +189,13 @@ fn main() -> Result<()> {
     enable_raw_mode()?;
     let mut stdout = std::io::stdout();
     let mut level = level_1();
+    let level_start = Instant::now();
     let (max_x, max_y) = level.size();
     stdout.execute(cursor::Hide)?;
     let mut run = true;
     while run {
         draw_level(&level, &stdout)?;
+        draw_ui(1, level_start.elapsed().as_secs() as u128, 0, &stdout)?;
         let player_point = &level.player_position();
 
         match player_point {
