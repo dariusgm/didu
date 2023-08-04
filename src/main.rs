@@ -103,7 +103,6 @@ impl Level {
                 None => {}
             }
         } else {
-            println!("Moved to invalid position")
             // moved to invalid position, ignoring
         }
     }
@@ -135,67 +134,90 @@ fn level_1() -> Level {
     level_data
 }
 
-fn draw_ui(level_number: u32, elapsed_time: u128, score: u32, mut stdout: &Stdout) -> Result<()> {
-    let (_, terminal_height) = crossterm::terminal::size()?;
-
-    // Calculate status bar position
-    let status_bar_position = terminal_height as usize - 1;
-
-    // Clear the status bar line
-    queue!(
-        stdout,
-        MoveTo(0, status_bar_position as u16),
-        crossterm::terminal::Clear(crossterm::terminal::ClearType::CurrentLine),
-    )?;
-
-    // Print status bar
-    queue!(
-        stdout,
-        MoveTo(0, status_bar_position as u16),
-        Print(format!(
-            "Level: {}, Time: {}, Score: {}",
-            level_number, elapsed_time, score
-        )),
-    )?;
-
-    stdout.flush()?;
-    Ok(())
+#[derive(Debug)]
+struct Drawing {
+    stdout: Stdout,
 }
-fn draw_level(level: &Level, mut stdout: &Stdout) -> Result<()> {
-    stdout.execute(terminal::Clear(ClearType::All))?;
-    for (point, cell) in level.data.iter() {
-        stdout.execute(MoveTo(point.x as u16, point.y as u16))?;
-        match cell {
-            Cell::Empty => {
-                stdout.execute(SetForegroundColor(Color::Blue))?;
-                print!(".");
-            }
-            Cell::Player => {
-                stdout.execute(SetForegroundColor(Color::Red))?;
-                print!("@");
-            }
-            Cell::Exit => {
-                stdout.execute(SetForegroundColor(Color::Green))?;
-                print!("X");
-            }
-            _ => {}
+
+impl Drawing {
+    fn new() -> Self {
+        Drawing {
+            stdout: std::io::stdout(),
         }
-        stdout.execute(ResetColor)?;
     }
-    Ok(())
-}
 
+    fn flush(&mut self) {
+        self.stdout.flush();
+    }
+    fn reset(&mut self) -> Result<()> {
+        self.stdout.execute(cursor::Show)?;
+        self.stdout.execute(ResetColor)?;
+        self.stdout.execute(terminal::Clear(ClearType::All))?;
+        Ok(())
+    }
+    fn draw_ui(&mut self, level_number: u32, elapsed_time: u128, score: u32) -> Result<()> {
+        let (_, terminal_height) = crossterm::terminal::size()?;
+
+        // Calculate status bar position
+        let status_bar_position = terminal_height as usize - 1;
+
+        // Clear the status bar line
+        queue!(
+            self.stdout,
+            MoveTo(0, status_bar_position as u16),
+            crossterm::terminal::Clear(crossterm::terminal::ClearType::CurrentLine),
+        )?;
+
+        // Print status bar
+        queue!(
+            self.stdout,
+            MoveTo(0, status_bar_position as u16),
+            Print(format!(
+                "Level: {}, Time: {}, Score: {}",
+                level_number, elapsed_time, score
+            )),
+        )?;
+
+        Ok(())
+    }
+    fn draw_level(&mut self, level: &Level) -> Result<()> {
+        self.stdout.execute(terminal::Clear(ClearType::All))?;
+        for (point, cell) in level.data.iter() {
+            self.stdout
+                .execute(MoveTo(point.x as u16, point.y as u16))?;
+            match cell {
+                Cell::Empty => {
+                    self.stdout.execute(SetForegroundColor(Color::Blue))?;
+                    print!(".");
+                }
+                Cell::Player => {
+                    self.stdout.execute(SetForegroundColor(Color::Red))?;
+                    print!("@");
+                }
+                Cell::Exit => {
+                    self.stdout.execute(SetForegroundColor(Color::Green))?;
+                    print!("X");
+                }
+                _ => {}
+            }
+            self.stdout.execute(ResetColor)?;
+        }
+        Ok(())
+    }
+}
 fn main() -> Result<()> {
     enable_raw_mode()?;
     let mut stdout = std::io::stdout();
+    let mut drawing = Drawing::new();
     let mut level = level_1();
     let level_start = Instant::now();
     let (max_x, max_y) = level.size();
     stdout.execute(cursor::Hide)?;
     let mut run = true;
     while run {
-        draw_level(&level, &stdout)?;
-        draw_ui(1, level_start.elapsed().as_secs() as u128, 0, &stdout)?;
+        drawing.draw_level(&level)?;
+        drawing.draw_ui(1, level_start.elapsed().as_secs() as u128, 0)?;
+
         let player_point = &level.player_position();
 
         match player_point {
@@ -261,8 +283,6 @@ fn main() -> Result<()> {
             None => print!("Game Over"),
         }
     }
-    stdout.execute(cursor::Show)?;
-    stdout.execute(ResetColor)?;
-    stdout.execute(terminal::Clear(ClearType::All))?;
+    drawing.reset()?;
     Ok(())
 }
