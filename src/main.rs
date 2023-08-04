@@ -314,7 +314,7 @@ fn main() -> Result<()> {
                         }
                         // check if player lost
                         if let Some(&cell) = level.data.get(&new_position) {
-                            if cell == Cell::Enemy {
+                            if cell == Cell::Enemy || cell == Cell::Void {
                                 run = false
                             }
                         }
