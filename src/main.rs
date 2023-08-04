@@ -31,7 +31,7 @@ struct Point {
     x: i8,
     y: i8,
 }
-
+#[derive(Clone)]
 struct Level {
     data: HashMap<Point, Cell>,
 }
@@ -199,7 +199,7 @@ impl Drawing {
         self.stdout.execute(terminal::Clear(ClearType::All))?;
         Ok(())
     }
-    fn draw_ui(&mut self, level_number: u32, elapsed_time: u128, score: u32) -> Result<()> {
+    fn draw_ui(&mut self, level_number: usize, elapsed_time: u128, score: u32) -> Result<()> {
         let (_, terminal_height) = crossterm::terminal::size()?;
 
         // Calculate status bar position
@@ -277,82 +277,98 @@ impl Drawing {
 fn main() -> Result<()> {
     enable_raw_mode()?;
     let mut drawing = Drawing::new();
-    // let mut level = level_1();
-    let mut level = level_2();
-    let level_start = Instant::now();
-    let (max_x, max_y) = level.size();
+    let levels = vec![level_1(), level_2()];
     drawing.init()?;
-    let mut run = true;
-    while run {
-        drawing.draw_level(&level)?;
-        drawing.draw_ui(1, level_start.elapsed().as_secs() as u128, 0)?;
-        drawing.flush()?;
 
-        let player_point = &level.player_position();
+    // for each level, clone the level into the buffer for modification.
+    // Run than the game loop
+    for (level_index, level) in levels.iter().enumerate() {
+        let mut cloned_level = level.clone();
 
-        match player_point {
-            Some(point) => {
-                if poll_event(Duration::from_millis(100))? {
-                    if let Event_::Key(event) = read_event()? {
-                        let new_position = match event.code {
-                            KeyCode_::Up => Point {
-                                x: point.x,
-                                y: point.y - 1,
-                            },
-                            KeyCode_::Down => Point {
-                                x: point.x,
-                                y: point.y + 1,
-                            },
-                            KeyCode_::Left => Point {
-                                x: point.x - 1,
-                                y: point.y,
-                            },
-                            KeyCode_::Right => Point {
-                                x: point.x + 1,
-                                y: point.y,
-                            },
-                            KeyCode_::Esc => {
-                                run = false;
-                                Point {
+        let (max_x, max_y) = level.size();
+        // Count time needed
+        let mut level_start = Instant::now();
+        // responsible for game loop
+        let mut run = true;
+        // restart current level when failed
+        let mut restart = false;
+        while run {
+            if restart {
+                cloned_level = level.clone();
+                level_start = Instant::now();
+                restart = false;
+            }
+            drawing.draw_level(&cloned_level)?;
+            drawing.draw_ui(level_index + 1, level_start.elapsed().as_secs() as u128, 0)?;
+            drawing.flush()?;
+
+            let player_point = &cloned_level.player_position();
+
+            match player_point {
+                Some(point) => {
+                    if poll_event(Duration::from_millis(100))? {
+                        if let Event_::Key(event) = read_event()? {
+                            let new_position = match event.code {
+                                KeyCode_::Up => Point {
+                                    x: point.x,
+                                    y: point.y - 1,
+                                },
+                                KeyCode_::Down => Point {
+                                    x: point.x,
+                                    y: point.y + 1,
+                                },
+                                KeyCode_::Left => Point {
+                                    x: point.x - 1,
+                                    y: point.y,
+                                },
+                                KeyCode_::Right => Point {
+                                    x: point.x + 1,
+                                    y: point.y,
+                                },
+                                KeyCode_::Esc => {
+                                    run = false;
+                                    Point {
+                                        x: point.x,
+                                        y: point.y,
+                                    }
+                                }
+                                KeyCode_::Char('q') => {
+                                    run = false;
+                                    Point {
+                                        x: point.x,
+                                        y: point.y,
+                                    }
+                                }
+                                _ => Point {
                                     x: point.x,
                                     y: point.y,
-                                }
-                            }
-                            KeyCode_::Char('q') => {
-                                run = false;
-                                Point {
-                                    x: point.x,
-                                    y: point.y,
-                                }
-                            }
-                            _ => Point {
-                                x: point.x,
-                                y: point.y,
-                            },
-                        };
+                                },
+                            };
 
-                        println!("{:?}", new_position);
-                        // check if finished
-                        if let Some(finish_point) = level.finish_position() {
-                            if finish_point.x == new_position.x && finish_point.y == new_position.y
-                            {
-                                run = false
+                            println!("{:?}", new_position);
+                            // check if finished
+                            if let Some(finish_point) = cloned_level.finish_position() {
+                                if finish_point.x == new_position.x
+                                    && finish_point.y == new_position.y
+                                {
+                                    run = false;
+                                }
                             }
-                        }
-                        // check if player lost
-                        if let Some(&cell) = level.data.get(&new_position) {
-                            if cell == Cell::Enemy || cell == Cell::Void {
-                                run = false
+                            // check if player lost
+                            if let Some(&cell) = cloned_level.data.get(&new_position) {
+                                if cell == Cell::Enemy || cell == Cell::Void {
+                                    restart = true;
+                                }
                             }
+                            cloned_level.move_player(*point, new_position, max_x, max_y);
                         }
-                        level.move_player(*point, new_position, max_x, max_y);
                     }
                 }
-            }
 
-            None => print!("Game Over"),
+                None => print!("Game Over"),
+            }
+            // drawing.flush()?;
         }
-        // drawing.flush()?;
     }
     drawing.reset()?;
     drawing.flush()?;
