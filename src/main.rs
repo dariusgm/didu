@@ -22,14 +22,8 @@ enum Cell {
     VerticalWall,
     Enemy,
     Void,
-}
-
-#[derive(Clone, PartialEq, Copy, Eq, Hash)]
-enum GlobalState {
-    Start,
-    Running,
-    Terminate,
-    Finished,
+    Switch(u8),
+    Door(u8),
 }
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
@@ -99,6 +93,7 @@ impl Level {
                         self.update(player, Cell::Empty);
                         self.update(new_position, Cell::Player);
                     }
+                    // everything else can not be passed
                     _ => {}
                 },
 
@@ -139,21 +134,24 @@ fn level_1() -> Level {
 fn level_2() -> Level {
     let mut level_data = Level::empty(5, 5);
     level_data.update(Point { x: 0, y: 4 }, Cell::Player);
-    level_data.update(Point { x: 4, y: 4 }, Cell::Exit);
 
     level_data.update(Point { x: 1, y: 1 }, Cell::VerticalWall);
     level_data.update(Point { x: 1, y: 2 }, Cell::VerticalWall);
     level_data.update(Point { x: 1, y: 3 }, Cell::VerticalWall);
     level_data.update(Point { x: 1, y: 4 }, Cell::VerticalWall);
 
+    level_data.update(Point { x: 2, y: 1 }, Cell::Switch(1));
+    level_data.update(Point { x: 2, y: 2 }, Cell::Void);
+    level_data.update(Point { x: 2, y: 3 }, Cell::Void);
+    level_data.update(Point { x: 2, y: 4 }, Cell::Void);
+
     level_data.update(Point { x: 3, y: 1 }, Cell::VerticalWall);
     level_data.update(Point { x: 3, y: 2 }, Cell::VerticalWall);
     level_data.update(Point { x: 3, y: 3 }, Cell::VerticalWall);
     level_data.update(Point { x: 3, y: 4 }, Cell::VerticalWall);
 
-    level_data.update(Point { x: 2, y: 2 }, Cell::Void);
-    level_data.update(Point { x: 2, y: 3 }, Cell::Void);
-    level_data.update(Point { x: 2, y: 4 }, Cell::Void);
+    level_data.update(Point { x: 4, y: 3 }, Cell::Door(1));
+    level_data.update(Point { x: 4, y: 4 }, Cell::Exit);
     level_data
 }
 
@@ -223,11 +221,13 @@ impl Drawing {
                     print!("@");
                 }
                 Cell::Exit => {
-                    self.stdout.execute(SetForegroundColor(Color::Green))?;
+                    self.stdout.execute(SetForegroundColor(Color::White))?;
+                    self.stdout.execute(SetBackgroundColor(Color::Black))?;
                     print!("X");
                 }
                 Cell::Void => {
                     self.stdout.execute(SetForegroundColor(Color::Black))?;
+                    self.stdout.execute(SetBackgroundColor(Color::Black))?;
                     print!(" ");
                 }
                 Cell::VerticalWall => {
@@ -239,6 +239,15 @@ impl Drawing {
                     self.stdout.execute(SetForegroundColor(Color::Grey))?;
                     self.stdout.execute(SetBackgroundColor(Color::Red))?;
                     print!("-");
+                }
+
+                Cell::Door(_) => {
+                    self.stdout.execute(SetForegroundColor(Color::Red))?;
+                    print!("D");
+                }
+                Cell::Switch(_) => {
+                    self.stdout.execute(SetForegroundColor(Color::Green))?;
+                    print!("S");
                 }
                 _ => {}
             }
