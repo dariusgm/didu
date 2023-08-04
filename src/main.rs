@@ -173,6 +173,20 @@ fn level_2() -> Level {
     level_data
 }
 
+fn level_3() -> Level {
+    let mut level_data = Level::empty(3, 5);
+    level_data.update(Point { x: 0, y: 0 }, Cell::Enemy);
+    level_data.update(Point { x: 0, y: 2 }, Cell::Enemy);
+    level_data.update(Point { x: 0, y: 4 }, Cell::Player);
+
+    level_data.update(Point { x: 1, y: 1 }, Cell::Void);
+    level_data.update(Point { x: 1, y: 3 }, Cell::Void);
+    level_data.update(Point { x: 1, y: 4 }, Cell::Void);
+
+    level_data.update(Point { x: 2, y: 0 }, Cell::Enemy);
+    level_data.update(Point { x: 2, y: 4 }, Cell::Exit);
+    level_data
+}
 #[derive(Debug)]
 struct Drawing {
     stdout: Stdout,
