@@ -134,6 +134,13 @@ fn level_1() -> Level {
     level_data
 }
 
+fn level_2() -> Level {
+    let mut level_data = Level::empty(5, 5);
+    level_data.update(Point { x: 0, y: 4 }, Cell::Player);
+    level_data.update(Point { x: 4, y: 4 }, Cell::Exit);
+    level_data
+}
+
 #[derive(Debug)]
 struct Drawing {
     stdout: Stdout,
@@ -148,6 +155,10 @@ impl Drawing {
 
     fn flush(&mut self) {
         self.stdout.flush();
+    }
+
+    fn init(&mut self) {
+        self.stdout.execute(cursor::Hide);
     }
     fn reset(&mut self) -> Result<()> {
         self.stdout.execute(cursor::Show)?;
@@ -207,12 +218,12 @@ impl Drawing {
 }
 fn main() -> Result<()> {
     enable_raw_mode()?;
-    let mut stdout = std::io::stdout();
     let mut drawing = Drawing::new();
-    let mut level = level_1();
+    // let mut level = level_1();
+    let mut level = level_2();
     let level_start = Instant::now();
     let (max_x, max_y) = level.size();
-    stdout.execute(cursor::Hide)?;
+    drawing.init();
     let mut run = true;
     while run {
         drawing.draw_level(&level)?;
@@ -282,7 +293,9 @@ fn main() -> Result<()> {
 
             None => print!("Game Over"),
         }
+        drawing.flush();
     }
     drawing.reset()?;
+    drawing.flush();
     Ok(())
 }
