@@ -184,6 +184,17 @@ impl Drawing {
             stdout: std::io::stdout(),
         }
     }
+    fn show_timing(&mut self, timing: Vec<u128>) -> Result<()> {
+        queue!(self.stdout, MoveTo(0, 0), Print("Level | Time in ms"))?;
+        for (i, t) in timing.iter().enumerate() {
+            queue!(
+                self.stdout,
+                MoveTo(0, i as u16 + 1),
+                Print(format!("{:?} | {:?}\n", i, t))
+            )?;
+        }
+        Ok(())
+    }
 
     fn flush(&mut self) -> Result<()> {
         self.stdout.flush()
@@ -279,7 +290,7 @@ fn main() -> Result<()> {
     let mut drawing = Drawing::new();
     let levels = vec![level_1(), level_2()];
     drawing.init()?;
-
+    let mut timing: Vec<u128> = vec![];
     // for each level, clone the level into the buffer for modification.
     // Run than the game loop
     for (level_index, level) in levels.iter().enumerate() {
@@ -352,6 +363,7 @@ fn main() -> Result<()> {
                                     && finish_point.y == new_position.y
                                 {
                                     run = false;
+                                    timing.push(level_start.elapsed().as_millis());
                                 }
                             }
                             // check if player lost
@@ -372,5 +384,8 @@ fn main() -> Result<()> {
     }
     drawing.reset()?;
     drawing.flush()?;
+    drawing.show_timing(timing);
+    drawing.flush();
+    // Show timings by level
     Ok(())
 }
