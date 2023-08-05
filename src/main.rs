@@ -29,7 +29,7 @@ enum Cell {
     Exit,
     HorizontalWall,
     VerticalWall,
-    Enemy(Direction),
+    CounterClockwiseEnemy(Direction),
     Void,
     Switch(u8),
     Door(u8),
@@ -65,11 +65,63 @@ impl Level {
     }
 
     fn update_enemies(&mut self) {
-        for (&point, &cell) in self.data.iter() {
-            match cell {
-                // try move right
-                Cell::Enemy(Direction::Right) => {}
-                _ => {}
+        for (&point, &cell) in self.data.clone().iter() {
+            // try move
+            let optional_target_point = match cell {
+                Cell::CounterClockwiseEnemy(Direction::Right) => Some(Point {
+                    x: point.x + 1,
+                    y: point.y,
+                }),
+                Cell::CounterClockwiseEnemy(Direction::Up) => Some(Point {
+                    x: point.x,
+                    y: point.y - 1,
+                }),
+                Cell::CounterClockwiseEnemy(Direction::Down) => Some(Point {
+                    x: point.x,
+                    y: point.y + 1,
+                }),
+                Cell::CounterClockwiseEnemy(Direction::Left) => Some(Point {
+                    x: point.x - 1,
+                    y: point.y,
+                }),
+                _ => None,
+            };
+            let target_rotation = match cell {
+                Cell::CounterClockwiseEnemy(Direction::Up) => Direction::Left,
+                Cell::CounterClockwiseEnemy(Direction::Down) => Direction::Right,
+                Cell::CounterClockwiseEnemy(Direction::Left) => Direction::Down,
+                _ => Direction::Up,
+            };
+            if let Some(target_point) = optional_target_point {
+                let cloned_cell = &self.data.get(&target_point).cloned();
+                match cloned_cell {
+                    // we can move
+                    Some(Cell::Empty) => {
+                        self.update(point, Cell::Empty);
+                        self.update(target_point, cell);
+                    }
+                    // remove player from grid.
+                    Some(Cell::Player) => {
+                        self.update(point, Cell::Empty);
+                        self.update(target_point, cell)
+                    }
+                    // rotate enemy for the following cases without moving it.
+                    Some(Cell::VerticalWall) => {
+                        self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
+                    }
+                    Some(Cell::HorizontalWall) => {
+                        self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
+                    }
+                    Some(Cell::Void) => {
+                        self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
+                    }
+                    // collision with something else not implemented.
+                    // It would require data structure change to have two elements on the same
+                    // cell.
+                    Some(_) => {}
+                    // Out of bounds in front of us, need to rotate as well.
+                    None => self.update(point, Cell::CounterClockwiseEnemy(target_rotation)),
+                }
             }
         }
     }
@@ -188,17 +240,38 @@ fn level_2() -> Level {
 }
 
 fn level_3() -> Level {
-    let mut level_data = Level::empty(3, 5);
-    level_data.update(Point { x: 0, y: 0 }, Cell::Enemy(Direction::Right));
-    level_data.update(Point { x: 0, y: 2 }, Cell::Enemy(Direction::Up));
-    level_data.update(Point { x: 0, y: 4 }, Cell::Player);
+    let mut level_data = Level::empty(8, 3);
+    level_data.update(Point { x: 0, y: 0 }, Cell::Void);
+    level_data.update(Point { x: 0, y: 1 }, Cell::Player);
+    level_data.update(Point { x: 0, y: 2 }, Cell::Void);
 
-    level_data.update(Point { x: 1, y: 1 }, Cell::Void);
-    level_data.update(Point { x: 1, y: 3 }, Cell::Void);
-    level_data.update(Point { x: 1, y: 4 }, Cell::Void);
+    level_data.update(Point { x: 1, y: 0 }, Cell::Void);
+    level_data.update(Point { x: 1, y: 2 }, Cell::Void);
 
-    level_data.update(Point { x: 2, y: 0 }, Cell::Enemy(Direction::Down));
-    level_data.update(Point { x: 2, y: 4 }, Cell::Exit);
+    level_data.update(
+        Point { x: 3, y: 0 },
+        Cell::CounterClockwiseEnemy(Direction::Left),
+    );
+    level_data.update(Point { x: 3, y: 1 }, Cell::Void);
+    level_data.update(
+        Point { x: 3, y: 2 },
+        Cell::CounterClockwiseEnemy(Direction::Right),
+    );
+
+    level_data.update(Point { x: 4, y: 1 }, Cell::Void);
+
+    level_data.update(
+        Point { x: 5, y: 1 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+
+    level_data.update(Point { x: 6, y: 0 }, Cell::Void);
+    level_data.update(Point { x: 6, y: 2 }, Cell::Void);
+
+    level_data.update(Point { x: 7, y: 0 }, Cell::Void);
+    level_data.update(Point { x: 7, y: 1 }, Cell::Exit);
+    level_data.update(Point { x: 7, y: 2 }, Cell::Void);
+
     level_data
 }
 #[derive(Debug)]
@@ -298,7 +371,7 @@ impl Drawing {
                     self.stdout.execute(SetForegroundColor(Color::Green))?;
                     print!("S");
                 }
-                Cell::Enemy(_) => {
+                Cell::CounterClockwiseEnemy(_) => {
                     self.stdout.execute(SetForegroundColor(Color::DarkRed))?;
                     print!("§")
                 }
@@ -400,7 +473,7 @@ fn main() -> Result<()> {
                             // check if player lost
                             if let Some(&cell) = cloned_level.data.get(&new_position) {
                                 match cell {
-                                    Cell::Enemy(_) => restart = true,
+                                    Cell::CounterClockwiseEnemy(_) => restart = true,
                                     Cell::Void => restart = true,
                                     _ => {}
                                 }
@@ -416,7 +489,8 @@ fn main() -> Result<()> {
                     }
                 }
 
-                None => print!("Game Over"),
+                // player was removed via enemy. restart.
+                None => restart = true,
             }
         }
     }
