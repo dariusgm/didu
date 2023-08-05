@@ -33,6 +33,7 @@ enum Cell {
     Void,
     Switch(u8),
     Door(u8),
+    OneWayTeleporter(Point),
 }
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
@@ -180,6 +181,12 @@ impl Level {
                         if let Some(door_position) = self.door_position(switch_id) {
                             self.update(door_position, Cell::Empty);
                         }
+                    }
+                    // Triggering a teleporter, moves me to the destination
+                    Cell::OneWayTeleporter(destination_point) => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Empty);
+                        self.update(destination_point, Cell::Player)
                     }
                     // everything else can not be passed
                     _ => {}
@@ -373,7 +380,11 @@ impl Drawing {
                 }
                 Cell::CounterClockwiseEnemy(_) => {
                     self.stdout.execute(SetForegroundColor(Color::DarkRed))?;
-                    print!("§")
+                    print!("§");
+                }
+                Cell::OneWayTeleporter(_) => {
+                    self.stdout.execute(SetForegroundColor(Color::DarkBlue))?;
+                    print!("T");
                 }
                 _ => {}
             }
