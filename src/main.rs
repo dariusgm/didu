@@ -281,6 +281,93 @@ fn level_3() -> Level {
 
     level_data
 }
+
+fn level_4() -> Level {
+    let mut level_data = Level::empty(31, 23);
+    for i in 0..23 {
+        level_data.update(Point { x: 26, y: i }, Cell::Void);
+        level_data.update(Point { x: 28, y: i }, Cell::Void);
+    }
+
+    for i in 0..30 {
+        level_data.update(Point { x: i, y: 0 }, Cell::HorizontalWall);
+        level_data.update(Point { x: i, y: 7 }, Cell::HorizontalWall);
+        level_data.update(Point { x: i, y: 8 }, Cell::Void);
+        level_data.update(Point { x: i, y: 9 }, Cell::HorizontalWall);
+        level_data.update(Point { x: i, y: 13 }, Cell::HorizontalWall);
+        level_data.update(Point { x: i, y: 14 }, Cell::Void);
+        level_data.update(Point { x: i, y: 15 }, Cell::HorizontalWall);
+        level_data.update(Point { x: i, y: 23 }, Cell::HorizontalWall);
+    }
+
+    // Place Vertical Wall
+    for i in 0..23 {
+        level_data.update(Point { x: 25, y: i }, Cell::VerticalWall);
+        level_data.update(Point { x: 29, y: i }, Cell::VerticalWall);
+    }
+
+    // Place all wrong teleporters for "day"
+    for i in (1..21).step_by(2) {
+        level_data.update(
+            Point { x: i, y: 2 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 2 }),
+        );
+        level_data.update(
+            Point { x: i, y: 4 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 4 }),
+        );
+        level_data.update(
+            Point { x: i, y: 6 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 6 }),
+        );
+    }
+    level_data.update(
+        Point { x: 21, y: 6 },
+        Cell::OneWayTeleporter(Point { x: 27, y: 6 }),
+    );
+
+    // Place all wrong teleporters for "month"
+    for i in (1..25).step_by(2) {
+        level_data.update(
+            Point { x: i, y: 11 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 11 }),
+        )
+    }
+
+    // Place all wrong teleporters for "year"
+    for i in (1..21).step_by(2) {
+        level_data.update(
+            Point { x: i, y: 17 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 16 }),
+        );
+        level_data.update(
+            Point { x: i, y: 19 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 18 }),
+        );
+        level_data.update(
+            Point { x: i, y: 21 },
+            Cell::OneWayTeleporter(Point { x: 27, y: 20 }),
+        );
+    }
+    // add teleporter for day -> month
+    level_data.update(
+        Point { x: 9, y: 2 },
+        Cell::OneWayTeleporter(Point { x: 24, y: 11 }),
+    );
+    // add teleporter for month -> year
+    level_data.update(
+        Point { x: 15, y: 11 },
+        Cell::OneWayTeleporter(Point { x: 24, y: 18 }),
+    );
+    // add teleporter year -> exit
+    level_data.update(
+        Point { x: 5, y: 21 },
+        Cell::OneWayTeleporter(Point { x: 30, y: 0 }),
+    );
+    level_data.update(Point { x: 24, y: 4 }, Cell::Player);
+    level_data.update(Point { x: 30, y: 23 }, Cell::Exit);
+    level_data
+}
 #[derive(Debug)]
 struct Drawing {
     stdout: Stdout,
@@ -318,18 +405,18 @@ impl Drawing {
         self.stdout.execute(terminal::Clear(ClearType::All))?;
         Ok(())
     }
-    fn draw_ui(&mut self, level_number: usize, elapsed_time: u128) -> Result<()> {
+    fn draw_ui(&mut self, level_number: usize, elapsed_time: u128, max_x: u16) -> Result<()> {
         // Clear the status bar line
         queue!(
             self.stdout,
-            MoveTo(0, 10),
+            MoveTo(0, max_x + 2),
             crossterm::terminal::Clear(crossterm::terminal::ClearType::CurrentLine),
         )?;
 
         // Print status bar
         queue!(
             self.stdout,
-            MoveTo(0, 10),
+            MoveTo(0, max_x + 2),
             Print(format!("Level: {}, Time: {}", level_number, elapsed_time)),
         )?;
 
@@ -396,7 +483,7 @@ impl Drawing {
 fn main() -> Result<()> {
     enable_raw_mode()?;
     let mut drawing = Drawing::new();
-    let levels = vec![level_3(), level_1(), level_2()];
+    let levels = vec![level_4(), level_1(), level_2(), level_3()];
     drawing.init()?;
     let mut timing: Vec<u128> = vec![];
     let mut terminate = false;
@@ -426,7 +513,11 @@ fn main() -> Result<()> {
                 continue;
             }
             drawing.draw_level(&cloned_level)?;
-            drawing.draw_ui(level_index + 1, level_start.elapsed().as_secs() as u128)?;
+            drawing.draw_ui(
+                level_index + 1,
+                level_start.elapsed().as_secs() as u128,
+                max_x as u16,
+            )?;
             drawing.flush()?;
 
             let player_point = &cloned_level.player_position();
@@ -461,6 +552,13 @@ fn main() -> Result<()> {
                                 }
                                 KeyCode_::Char('q') => {
                                     terminate = true;
+                                    Point {
+                                        x: point.x,
+                                        y: point.y,
+                                    }
+                                }
+                                KeyCode_::Char('r') => {
+                                    restart = true;
                                     Point {
                                         x: point.x,
                                         y: point.y,
