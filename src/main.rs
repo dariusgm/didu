@@ -36,6 +36,12 @@ enum Cell {
     OneWayTeleporter(Point),
 }
 
+#[derive(Clone, PartialEq, Eq, Copy, Hash, Debug)]
+enum Camera {
+    Fixed,
+    Centered,
+}
+
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
 struct Point {
     x: i8,
@@ -44,6 +50,7 @@ struct Point {
 #[derive(Clone)]
 struct Level {
     data: HashMap<Point, Cell>,
+    camera: Camera,
 }
 
 impl Level {
@@ -62,7 +69,10 @@ impl Level {
             }
         }
 
-        Self { data }
+        Self {
+            data,
+            camera: Camera::Fixed,
+        }
     }
 
     fn update_enemies(&mut self) {
@@ -368,6 +378,11 @@ fn level_4() -> Level {
     level_data.update(Point { x: 30, y: 23 }, Cell::Exit);
     level_data
 }
+
+fn level_5() -> Level {
+    let mut level_data = Level::empty(31, 23);
+    level_data
+}
 #[derive(Debug)]
 struct Drawing {
     stdout: Stdout,
@@ -483,7 +498,7 @@ impl Drawing {
 fn main() -> Result<()> {
     enable_raw_mode()?;
     let mut drawing = Drawing::new();
-    let levels = vec![level_4(), level_1(), level_2(), level_3()];
+    let levels = vec![level_5(), level_1(), level_2(), level_3(), level_4()];
     drawing.init()?;
     let mut timing: Vec<u128> = vec![];
     let mut terminate = false;
