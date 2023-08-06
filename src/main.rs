@@ -8,7 +8,7 @@ use crossterm::{
     queue,
     style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::enable_raw_mode,
-    terminal::{self, ClearType},
+    terminal::{self, Clear, ClearType},
     ExecutableCommand, Result,
 };
 use std::{collections::HashMap, io::Stdout, time::Duration};
@@ -437,61 +437,67 @@ impl Drawing {
 
         Ok(())
     }
+
     fn draw_level(&mut self, level: &Level) -> Result<()> {
-        self.stdout.execute(terminal::Clear(ClearType::All))?;
+        queue!(self.stdout, Clear(ClearType::All))?;
         for (point, cell) in level.data.iter() {
-            self.stdout
-                .execute(MoveTo(point.x as u16, point.y as u16))?;
+            queue!(self.stdout, MoveTo(point.x as u16, point.y as u16))?;
             match cell {
                 Cell::Empty => {
-                    self.stdout.execute(SetForegroundColor(Color::Blue))?;
-                    print!(".");
+                    queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."))?;
                 }
                 Cell::Player => {
-                    self.stdout.execute(SetForegroundColor(Color::Red))?;
-                    print!("@");
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"));
                 }
                 Cell::Exit => {
-                    self.stdout.execute(SetForegroundColor(Color::White))?;
-                    self.stdout.execute(SetBackgroundColor(Color::Black))?;
-                    print!("X");
+                    queue!(
+                        self.stdout,
+                        SetForegroundColor(Color::White),
+                        SetBackgroundColor(Color::Black),
+                        Print("X")
+                    );
                 }
                 Cell::Void => {
-                    self.stdout.execute(SetForegroundColor(Color::Black))?;
-                    self.stdout.execute(SetBackgroundColor(Color::Black))?;
-                    print!(" ");
+                    queue!(
+                        self.stdout,
+                        SetForegroundColor(Color::Black),
+                        SetBackgroundColor(Color::Black),
+                        Print(" ")
+                    );
                 }
                 Cell::VerticalWall => {
-                    self.stdout.execute(SetForegroundColor(Color::Grey))?;
-                    self.stdout.execute(SetBackgroundColor(Color::Red))?;
-                    print!("|");
+                    queue!(
+                        self.stdout,
+                        SetForegroundColor(Color::Grey),
+                        SetBackgroundColor(Color::Red),
+                        Print("|")
+                    );
                 }
                 Cell::HorizontalWall => {
-                    self.stdout.execute(SetForegroundColor(Color::Grey))?;
-                    self.stdout.execute(SetBackgroundColor(Color::Red))?;
-                    print!("-");
+                    queue!(
+                        self.stdout,
+                        SetForegroundColor(Color::Grey),
+                        SetBackgroundColor(Color::Red),
+                        Print("-")
+                    );
                 }
-
                 Cell::Door(_) => {
-                    self.stdout.execute(SetForegroundColor(Color::Red))?;
-                    print!("D");
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("D"));
                 }
                 Cell::Switch(_) => {
-                    self.stdout.execute(SetForegroundColor(Color::Green))?;
-                    print!("S");
+                    queue!(self.stdout, SetForegroundColor(Color::Green), Print("S"));
                 }
                 Cell::CounterClockwiseEnemy(_) => {
-                    self.stdout.execute(SetForegroundColor(Color::DarkRed))?;
-                    print!("§");
+                    queue!(self.stdout, SetForegroundColor(Color::DarkRed), Print("§"));
                 }
                 Cell::OneWayTeleporter(_) => {
-                    self.stdout.execute(SetForegroundColor(Color::DarkBlue))?;
-                    print!("T");
+                    queue!(self.stdout, SetForegroundColor(Color::DarkBlue), Print("T"));
                 }
                 _ => {}
             }
-            self.stdout.execute(ResetColor)?;
+            queue!(self.stdout, ResetColor)?;
         }
+        self.stdout.flush()?; // Flush the queued commands
         Ok(())
     }
 }
