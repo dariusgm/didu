@@ -36,11 +36,6 @@ enum Cell {
     OneWayTeleporter(Point),
 }
 
-#[derive(Clone, PartialEq, Eq, Copy, Hash, Debug)]
-enum Camera {
-    Fixed,
-    Centered,
-}
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
 struct Point {
@@ -50,7 +45,6 @@ struct Point {
 #[derive(Clone)]
 struct Level {
     data: HashMap<Point, Cell>,
-    camera: Camera,
 }
 
 impl Level {
@@ -69,9 +63,13 @@ impl Level {
             }
         }
 
+        // Default Player Spawn
+        //data.insert(Point { x: 0, y: 0 }, Cell::Player);
+        // Default Exit location
+        //data.insert(Point {x: width as i8 -1, y:height as i8 -1}, Cell::Exit);
+
         Self {
             data,
-            camera: Camera::Fixed,
         }
     }
 
@@ -380,9 +378,11 @@ fn level_4() -> Level {
 }
 
 fn level_5() -> Level {
-    
-    Level::empty(31, 23)
+    let mut l = Level::empty(31, 23);
+    l.update(Point {x:0, y:0}, Cell::Player);
+    l
 }
+
 #[derive(Debug)]
 struct Drawing {
     stdout: Stdout,
@@ -444,7 +444,7 @@ impl Drawing {
             queue!(self.stdout, MoveTo(point.x as u16, point.y as u16))?;
             match cell {
                 Cell::Empty => {
-                    queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."))?;
+                    queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."));
                 }
                 Cell::Player => {
                     queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"));
@@ -482,16 +482,16 @@ impl Drawing {
                     );
                 }
                 Cell::Door(_) => {
-                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("D"));
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("D"))?;
                 }
                 Cell::Switch(_) => {
-                    queue!(self.stdout, SetForegroundColor(Color::Green), Print("S"));
+                    queue!(self.stdout, SetForegroundColor(Color::Green), Print("S"))?;
                 }
                 Cell::CounterClockwiseEnemy(_) => {
-                    queue!(self.stdout, SetForegroundColor(Color::DarkRed), Print("§"));
+                    queue!(self.stdout, SetForegroundColor(Color::DarkRed), Print("§"))?;
                 }
                 Cell::OneWayTeleporter(_) => {
-                    queue!(self.stdout, SetForegroundColor(Color::DarkBlue), Print("T"));
+                    queue!(self.stdout, SetForegroundColor(Color::DarkBlue), Print("T"))?;
                 }
                 _ => {}
             }
