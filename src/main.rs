@@ -36,7 +36,6 @@ enum Cell {
     OneWayTeleporter(Point),
 }
 
-
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
 struct Point {
     x: i8,
@@ -68,9 +67,7 @@ impl Level {
         // Default Exit location
         //data.insert(Point {x: width as i8 -1, y:height as i8 -1}, Cell::Exit);
 
-        Self {
-            data,
-        }
+        Self { data }
     }
 
     fn update_enemies(&mut self) {
@@ -379,7 +376,7 @@ fn level_4() -> Level {
 
 fn level_5() -> Level {
     let mut l = Level::empty(31, 23);
-    l.update(Point {x:0, y:0}, Cell::Player);
+    l.update(Point { x: 0, y: 0 }, Cell::Player);
     l
 }
 
@@ -444,10 +441,10 @@ impl Drawing {
             queue!(self.stdout, MoveTo(point.x as u16, point.y as u16))?;
             match cell {
                 Cell::Empty => {
-                    queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."));
+                    queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."))?;
                 }
                 Cell::Player => {
-                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"));
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"))?;
                 }
                 Cell::Exit => {
                     queue!(
@@ -455,7 +452,7 @@ impl Drawing {
                         SetForegroundColor(Color::White),
                         SetBackgroundColor(Color::Black),
                         Print("X")
-                    );
+                    )?;
                 }
                 Cell::Void => {
                     queue!(
@@ -463,7 +460,7 @@ impl Drawing {
                         SetForegroundColor(Color::Black),
                         SetBackgroundColor(Color::Black),
                         Print(" ")
-                    );
+                    )?;
                 }
                 Cell::VerticalWall => {
                     queue!(
@@ -471,7 +468,7 @@ impl Drawing {
                         SetForegroundColor(Color::Grey),
                         SetBackgroundColor(Color::Red),
                         Print("|")
-                    );
+                    )?;
                 }
                 Cell::HorizontalWall => {
                     queue!(
@@ -479,7 +476,7 @@ impl Drawing {
                         SetForegroundColor(Color::Grey),
                         SetBackgroundColor(Color::Red),
                         Print("-")
-                    );
+                    )?;
                 }
                 Cell::Door(_) => {
                     queue!(self.stdout, SetForegroundColor(Color::Red), Print("D"))?;
@@ -493,7 +490,6 @@ impl Drawing {
                 Cell::OneWayTeleporter(_) => {
                     queue!(self.stdout, SetForegroundColor(Color::DarkBlue), Print("T"))?;
                 }
-                _ => {}
             }
             queue!(self.stdout, ResetColor)?;
         }
