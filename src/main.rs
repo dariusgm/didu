@@ -138,7 +138,7 @@ impl Level {
     }
 
     fn update(&mut self, point: Point, cell: Cell) {
-        self.data.insert(point.clone(), cell.clone());
+        self.data.insert(point, cell);
     }
     fn door_position(&self, switch_id: u8) -> Option<Point> {
         for (&point, &cell) in self.data.iter() {
@@ -221,7 +221,7 @@ impl Level {
                 max_y = point.y
             }
         }
-        return (max_x, max_y);
+        (max_x, max_y)
     }
 }
 
@@ -380,8 +380,8 @@ fn level_4() -> Level {
 }
 
 fn level_5() -> Level {
-    let mut level_data = Level::empty(31, 23);
-    level_data
+    
+    Level::empty(31, 23)
 }
 #[derive(Debug)]
 struct Drawing {
