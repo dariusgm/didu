@@ -171,34 +171,30 @@ impl Level {
             && new_position.y <= max_y
         {
             // Handle collosions here that will not reset the level
-            match self.data.get(&new_position).cloned() {
-                Some(cell) => match cell {
-                    // moved on empty space
-                    Cell::Empty => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Player);
-                    }
+            if let Some(cell) = self.data.get(&new_position).cloned() { match cell {
+                // moved on empty space
+                Cell::Empty => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, Cell::Player);
+                }
 
-                    // Triggering a switch removes the switch and the related door
-                    Cell::Switch(switch_id) => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Player);
-                        if let Some(door_position) = self.door_position(switch_id) {
-                            self.update(door_position, Cell::Empty);
-                        }
+                // Triggering a switch removes the switch and the related door
+                Cell::Switch(switch_id) => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, Cell::Player);
+                    if let Some(door_position) = self.door_position(switch_id) {
+                        self.update(door_position, Cell::Empty);
                     }
-                    // Triggering a teleporter, moves me to the destination
-                    Cell::OneWayTeleporter(destination_point) => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Empty);
-                        self.update(destination_point, Cell::Player)
-                    }
-                    // everything else can not be passed
-                    _ => {}
-                },
-
-                None => {}
-            }
+                }
+                // Triggering a teleporter, moves me to the destination
+                Cell::OneWayTeleporter(destination_point) => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, Cell::Empty);
+                    self.update(destination_point, Cell::Player)
+                }
+                // everything else can not be passed
+                _ => {}
+            } }
         } else {
             // moved to invalid position, ignoring
         }
