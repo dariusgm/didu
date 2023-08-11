@@ -34,6 +34,7 @@ enum Cell {
     Switch(u8),
     Door(u8),
     OneWayTeleporter(Point),
+    BreakableGround,
 }
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
@@ -61,11 +62,6 @@ impl Level {
                 );
             }
         }
-
-        // Default Player Spawn
-        //data.insert(Point { x: 0, y: 0 }, Cell::Player);
-        // Default Exit location
-        //data.insert(Point {x: width as i8 -1, y:height as i8 -1}, Cell::Exit);
 
         Self { data }
     }
@@ -171,30 +167,32 @@ impl Level {
             && new_position.y <= max_y
         {
             // Handle collosions here that will not reset the level
-            if let Some(cell) = self.data.get(&new_position).cloned() { match cell {
-                // moved on empty space
-                Cell::Empty => {
-                    self.update(player, Cell::Empty);
-                    self.update(new_position, Cell::Player);
-                }
-
-                // Triggering a switch removes the switch and the related door
-                Cell::Switch(switch_id) => {
-                    self.update(player, Cell::Empty);
-                    self.update(new_position, Cell::Player);
-                    if let Some(door_position) = self.door_position(switch_id) {
-                        self.update(door_position, Cell::Empty);
+            if let Some(cell) = self.data.get(&new_position).cloned() {
+                match cell {
+                    // moved on empty space
+                    Cell::Empty => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Player);
                     }
+
+                    // Triggering a switch removes the switch and the related door
+                    Cell::Switch(switch_id) => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Player);
+                        if let Some(door_position) = self.door_position(switch_id) {
+                            self.update(door_position, Cell::Empty);
+                        }
+                    }
+                    // Triggering a teleporter, moves me to the destination
+                    Cell::OneWayTeleporter(destination_point) => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Empty);
+                        self.update(destination_point, Cell::Player)
+                    }
+                    // everything else can not be passed
+                    _ => {}
                 }
-                // Triggering a teleporter, moves me to the destination
-                Cell::OneWayTeleporter(destination_point) => {
-                    self.update(player, Cell::Empty);
-                    self.update(new_position, Cell::Empty);
-                    self.update(destination_point, Cell::Player)
-                }
-                // everything else can not be passed
-                _ => {}
-            } }
+            }
         } else {
             // moved to invalid position, ignoring
         }
@@ -371,8 +369,68 @@ fn level_4() -> Level {
 }
 
 fn level_5() -> Level {
-    let mut l = Level::empty(31, 23);
-    l.update(Point { x: 0, y: 0 }, Cell::Player);
+    let mut l = Level::empty(13, 21);
+
+    l.update(
+        Point { x: 0, y: 0 },
+        Cell::CounterClockwiseEnemy(Direction::Right),
+    );
+    l.update(Point { x: 7, y: 0 }, Cell::Switch(0));
+    l.update(Point { x: 8, y: 0 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 0 }, Cell::Void);
+    l.update(Point { x: 11, y: 0 }, Cell::Door(0));
+
+    l.update(Point { x: 0, y: 1 }, Cell::HorizontalWall);
+    l.update(Point { x: 1, y: 1 }, Cell::HorizontalWall);
+    l.update(Point { x: 2, y: 1 }, Cell::BreakableGround);
+    l.update(Point { x: 3, y: 1 }, Cell::VerticalWall);
+    l.update(Point { x: 5, y: 1 }, Cell::HorizontalWall);
+    l.update(Point { x: 6, y: 1 }, Cell::HorizontalWall);
+    l.update(Point { x: 7, y: 1 }, Cell::HorizontalWall);
+    l.update(Point { x: 8, y: 1 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 1 }, Cell::Void);
+    l.update(Point { x: 11, y: 1 }, Cell::VerticalWall);
+
+    l.update(Point { x: 0, y: 2 }, Cell::Void);
+    l.update(Point { x: 1, y: 2 }, Cell::BreakableGround);
+    l.update(Point { x: 2, y: 2 }, Cell::BreakableGround);
+    l.update(Point { x: 3, y: 2 }, Cell::VerticalWall);
+    l.update(Point { x: 8, y: 2 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 2 }, Cell::Void);
+    l.update(Point { x: 11, y: 2 }, Cell::VerticalWall);
+    l.update(Point { x: 12, y: 2 }, Cell::Switch(0));
+
+    l.update(Point { x: 0, y: 3 }, Cell::HorizontalWall);
+    l.update(Point { x: 1, y: 3 }, Cell::Door(0));
+    l.update(Point { x: 2, y: 3 }, Cell::HorizontalWall);
+    l.update(Point { x: 3, y: 3 }, Cell::HorizontalWall);
+    l.update(Point { x: 4, y: 3 }, Cell::HorizontalWall);
+    l.update(Point { x: 5, y: 3 }, Cell::HorizontalWall);
+    l.update(Point { x: 6, y: 3 }, Cell::VerticalWall);
+    l.update(Point { x: 8, y: 3 }, Cell::Void);
+    l.update(Point { x: 9, y: 3 }, Cell::Void);
+    l.update(Point { x: 11, y: 3 }, Cell::VerticalWall);
+    l.update(
+        Point { x: 12, y: 3 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+
+    l.update(
+        Point { x: 0, y: 4 },
+        Cell::CounterClockwiseEnemy(Direction::Right),
+    );
+
+    l.update(Point { x: 5, y: 4 }, Cell::Void);
+    l.update(Point { x: 6, y: 4 }, Cell::VerticalWall);
+    l.update(Point { x: 7, y: 4 }, Cell::Switch(0));
+    l.update(Point { x: 8, y: 4 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 4 }, Cell::Void);
+    l.update(Point { x: 11, y: 4 }, Cell::VerticalWall);
+    l.update(
+        Point { x: 12, y: 4 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(Point { x: 12, y: 20 }, Cell::Player);
     l
 }
 
@@ -485,6 +543,9 @@ impl Drawing {
                 }
                 Cell::OneWayTeleporter(_) => {
                     queue!(self.stdout, SetForegroundColor(Color::DarkBlue), Print("T"))?;
+                }
+                Cell::BreakableGround => {
+                    queue!(self.stdout, SetForegroundColor(Color::Grey), Print("?"))?;
                 }
             }
             queue!(self.stdout, ResetColor)?;
