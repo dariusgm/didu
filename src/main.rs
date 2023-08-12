@@ -35,6 +35,7 @@ enum Cell {
     Door(u8),
     OneWayTeleporter(Point),
     BreakableGround,
+    Invincibility,
 }
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
@@ -441,6 +442,17 @@ fn level_5() -> Level {
         Cell::CounterClockwiseEnemy(Direction::Down),
     );
 
+    l.update(Point { x: 2, y: 6 }, Cell::Switch(0));
+    l.update(Point { x: 3, y: 6 }, Cell::Switch(0));
+    l.update(Point { x: 8, y: 6 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 6 }, Cell::Void);
+    l.update(Point { x: 10, y: 6 }, Cell::Invincibility);
+    l.update(Point { x: 11, y: 6 }, Cell::VerticalWall);
+    l.update(
+        Point { x: 12, y: 6 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+
     l.update(Point { x: 12, y: 20 }, Cell::Player);
     l
 }
@@ -557,6 +569,14 @@ impl Drawing {
                 }
                 Cell::BreakableGround => {
                     queue!(self.stdout, SetForegroundColor(Color::Grey), Print("?"))?;
+                }
+                Cell::Invincibility => {
+                    queue!(
+                        self.stdout,
+                        SetBackgroundColor(Color::Yellow),
+                        SetForegroundColor(Color::White),
+                        Print("o")
+                    )?;
                 }
             }
             queue!(self.stdout, ResetColor)?;
