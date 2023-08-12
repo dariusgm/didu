@@ -118,6 +118,12 @@ impl Level {
                     Some(Cell::Void) => {
                         self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
                     }
+                    Some(Cell::Door(_)) => {
+                        self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
+                    }
+                    Some(Cell::Switch(_)) => {
+                        self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
+                    }
                     // collision with something else not implemented.
                     // It would require data structure change to have two elements on the same
                     // cell.
@@ -370,7 +376,7 @@ fn level_4() -> Level {
 }
 
 fn level_5() -> Level {
-    let mut l = Level::empty(13, 21);
+    let mut l = Level::empty(13, 18);
 
     l.update(
         Point { x: 0, y: 0 },
@@ -557,6 +563,45 @@ fn level_5() -> Level {
     );
     l.update(Point { x: 8, y: 14 }, Cell::HorizontalWall);
 
+    l.update(Point { x: 4, y: 15 }, Cell::HorizontalWall);
+    l.update(
+        Point { x: 5, y: 15 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(
+        Point { x: 6, y: 15 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(
+        Point { x: 7, y: 15 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(Point { x: 8, y: 15 }, Cell::HorizontalWall);
+    l.update(Point { x: 4, y: 16 }, Cell::HorizontalWall);
+    l.update(
+        Point { x: 5, y: 16 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(
+        Point { x: 6, y: 16 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(
+        Point { x: 7, y: 16 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(Point { x: 8, y: 16 }, Cell::HorizontalWall);
+    l.update(Point { x: 4, y: 17 }, Cell::HorizontalWall);
+    l.update(
+        Point { x: 5, y: 17 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(Point { x: 6, y: 17 }, Cell::Exit);
+    l.update(
+        Point { x: 7, y: 17 },
+        Cell::CounterClockwiseEnemy(Direction::Up),
+    );
+    l.update(Point { x: 8, y: 17 }, Cell::HorizontalWall);
     l
 }
 
@@ -597,21 +642,109 @@ impl Drawing {
         self.stdout.execute(terminal::Clear(ClearType::All))?;
         Ok(())
     }
-    fn draw_ui(&mut self, level_number: usize, elapsed_time: u128, max_x: u16) -> Result<()> {
+    fn draw_ui(&mut self, level_number: usize, elapsed_time: u128, max_y: u16) -> Result<()> {
         // Clear the status bar line
         queue!(
             self.stdout,
-            MoveTo(0, max_x + 2),
+            MoveTo(0, max_y + 2),
             crossterm::terminal::Clear(crossterm::terminal::ClearType::CurrentLine),
         )?;
 
         // Print status bar
         queue!(
             self.stdout,
-            MoveTo(0, max_x + 2),
-            Print(format!("Level: {}, Time: {}", level_number, elapsed_time)),
+            MoveTo(0, max_y + 2),
+            Print(format!(
+                "Level: {}, Time: {}, h = toggle help",
+                level_number, elapsed_time
+            )),
         )?;
 
+        Ok(())
+    }
+
+    fn draw_help(&mut self, max_x: u16) -> Result<()> {
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 0),
+            Print("@ = Player - Use Arrow keys to move around.")
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 1),
+            Print("X = Exit that you need to reach.")
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 2),
+            Print(". = Empty Space - you can walk here.")
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 3),
+            Print(
+                "  = Void, you should not walk on it.
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 4),
+            Print(
+                "| = Vertical wall that you can't pass.
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 5),
+            Print(
+                "- = Horizontal wall that you can't pass.
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 6),
+            Print("S = A switch that opens a door. ")
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 7),
+            Print(
+                "D = A door. You need the correct Switch to open it.
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 8),
+            Print(
+                "§ = An enemy! Watch out!
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 9),
+            Print("T = A one way teleporter. ")
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 10),
+            Print(
+                "? = Breakable ground. Will transfer to void after passed once.
+"
+            )
+        )?;
+        queue!(
+            self.stdout,
+            MoveTo(max_x + 4, 11),
+            Print(
+                "o = Surprise Candy. Makes you feel really strong!
+"
+            )
+        )?;
         Ok(())
     }
 
@@ -695,6 +828,8 @@ fn main() -> Result<()> {
     drawing.init()?;
     let mut timing: Vec<u128> = vec![];
     let mut terminate = false;
+    // draw help overlay
+    let mut draw_help = false;
     // for each level, clone the level into the buffer for modification.
     // Run than the game loop
     for (level_index, level) in levels.iter().enumerate() {
@@ -724,8 +859,11 @@ fn main() -> Result<()> {
             drawing.draw_ui(
                 level_index + 1,
                 level_start.elapsed().as_secs() as u128,
-                max_x as u16,
+                max_y as u16,
             )?;
+            if draw_help {
+                drawing.draw_help(max_x as u16)?;
+            }
             drawing.flush()?;
 
             let player_point = &cloned_level.player_position();
@@ -767,6 +905,14 @@ fn main() -> Result<()> {
                                 }
                                 KeyCode_::Char('r') => {
                                     restart = true;
+                                    Point {
+                                        x: point.x,
+                                        y: point.y,
+                                    }
+                                }
+
+                                KeyCode_::Char('h') => {
+                                    draw_help = !draw_help;
                                     Point {
                                         x: point.x,
                                         y: point.y,
