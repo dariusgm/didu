@@ -467,7 +467,46 @@ fn level_5() -> Level {
         Cell::CounterClockwiseEnemy(Direction::Down),
     );
 
-    l.update(Point { x: 12, y: 20 }, Cell::Player);
+    l.update(Point { x: 5, y: 8 }, Cell::VerticalWall);
+    l.update(Point { x: 6, y: 8 }, Cell::BreakableGround);
+    l.update(Point { x: 12, y: 8 }, Cell::Invincibility);
+
+    l.update(Point { x: 0, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 1, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 2, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 3, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 4, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 5, y: 9 }, Cell::VerticalWall);
+    l.update(Point { x: 6, y: 9 }, Cell::Player);
+    l.update(Point { x: 7, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 8, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 9, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 10, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 11, y: 9 }, Cell::HorizontalWall);
+    l.update(Point { x: 12, y: 9 }, Cell::HorizontalWall);
+
+    l.update(Point { x: 3, y: 10 }, Cell::Invincibility);
+    l.update(Point { x: 5, y: 10 }, Cell::Door(0));
+    l.update(Point { x: 7, y: 10 }, Cell::Door(0));
+    l.update(
+        Point { x: 12, y: 10 },
+        Cell::OneWayTeleporter(Point { x: 0, y: 0 }),
+    );
+
+    l.update(Point { x: 0, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 1, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 2, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 3, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 4, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 5, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 6, y: 11 }, Cell::Door(0));
+    l.update(Point { x: 7, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 8, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 9, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 10, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 11, y: 11 }, Cell::HorizontalWall);
+    l.update(Point { x: 12, y: 11 }, Cell::HorizontalWall);
+
     l
 }
 
