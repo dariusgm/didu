@@ -682,26 +682,17 @@ impl Drawing {
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 3),
-            Print(
-                "  = Void, you should not walk on it.
-"
-            )
+            Print("  = Void, you should not walk on it.")
         )?;
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 4),
-            Print(
-                "| = Vertical wall that you can't pass.
-"
-            )
+            Print("| = Vertical wall that you can't pass.")
         )?;
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 5),
-            Print(
-                "- = Horizontal wall that you can't pass.
-"
-            )
+            Print("- = Horizontal wall that you can't pass.")
         )?;
         queue!(
             self.stdout,
@@ -711,18 +702,12 @@ impl Drawing {
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 7),
-            Print(
-                "D = A door. You need the correct Switch to open it.
-"
-            )
+            Print("D = A door. You need the correct Switch to open it.")
         )?;
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 8),
-            Print(
-                "§ = An enemy! Watch out!
-"
-            )
+            Print("§ = An enemy! Watch out!")
         )?;
         queue!(
             self.stdout,
@@ -732,18 +717,12 @@ impl Drawing {
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 10),
-            Print(
-                "? = Breakable ground. Will transfer to void after passed once.
-"
-            )
+            Print("? = Breakable ground. Will transfer to void after passed once.")
         )?;
         queue!(
             self.stdout,
             MoveTo(max_x + 4, 11),
-            Print(
-                "o = Surprise Candy. Makes you feel really strong!
-"
-            )
+            Print("o = Surprise Candy. Makes you feel really strong!")
         )?;
         Ok(())
     }
