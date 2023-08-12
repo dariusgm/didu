@@ -430,6 +430,17 @@ fn level_5() -> Level {
         Point { x: 12, y: 4 },
         Cell::CounterClockwiseEnemy(Direction::Up),
     );
+
+    l.update(Point { x: 6, y: 5 }, Cell::VerticalWall);
+    l.update(Point { x: 7, y: 5 }, Cell::HorizontalWall);
+    l.update(Point { x: 8, y: 5 }, Cell::VerticalWall);
+    l.update(Point { x: 9, y: 5 }, Cell::Void);
+    l.update(Point { x: 11, y: 5 }, Cell::VerticalWall);
+    l.update(
+        Point { x: 12, y: 5 },
+        Cell::CounterClockwiseEnemy(Direction::Down),
+    );
+
     l.update(Point { x: 12, y: 20 }, Cell::Player);
     l
 }
