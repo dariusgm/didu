@@ -22,10 +22,15 @@ enum Direction {
     Left,
 }
 
+#[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
+enum Powerup {
+    None,
+    Invincible(u8),
+}
 #[derive(Clone, PartialEq, Copy, Eq, Hash)]
 enum Cell {
     Empty,
-    Player,
+    Player(Powerup),
     Exit,
     HorizontalWall,
     VerticalWall,
@@ -43,6 +48,7 @@ struct Point {
     x: i8,
     y: i8,
 }
+
 #[derive(Clone)]
 struct Level {
     data: HashMap<Point, Cell>,
@@ -103,8 +109,8 @@ impl Level {
                         self.update(point, Cell::Empty);
                         self.update(target_point, cell);
                     }
-                    // remove player from grid.
-                    Some(Cell::Player) => {
+                    // remove player from grid
+                    Some(Cell::Player(Powerup::None)) => {
                         self.update(point, Cell::Empty);
                         self.update(target_point, cell)
                     }
@@ -159,8 +165,10 @@ impl Level {
 
     fn player_position(&self) -> Option<Point> {
         for (&point, &cell) in self.data.iter() {
-            if cell == Cell::Player {
-                return Some(point);
+            match cell {
+                Cell::Player(Powerup::Invincible(_)) => return Some(point),
+                Cell::Player(Powerup::None) => return Some(point),
+                _ => {}
             }
         }
         None
@@ -173,19 +181,22 @@ impl Level {
             && new_position.y >= 0
             && new_position.y <= max_y
         {
+            // get current player state
+            let player_struct = self.data.get(&player).cloned().unwrap();
+
             // Handle collosions here that will not reset the level
             if let Some(cell) = self.data.get(&new_position).cloned() {
                 match cell {
                     // moved on empty space
                     Cell::Empty => {
                         self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Player);
+                        self.update(new_position, player_struct);
                     }
 
                     // Triggering a switch removes the switch and the related door
                     Cell::Switch(switch_id) => {
                         self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Player);
+                        self.update(new_position, player_struct);
                         if let Some(door_position) = self.door_position(switch_id) {
                             self.update(door_position, Cell::Empty);
                         }
@@ -194,7 +205,12 @@ impl Level {
                     Cell::OneWayTeleporter(destination_point) => {
                         self.update(player, Cell::Empty);
                         self.update(new_position, Cell::Empty);
-                        self.update(destination_point, Cell::Player)
+                        self.update(destination_point, player_struct)
+                    }
+                    //Triggering Invincibility Candy
+                    Cell::Invincibility => {
+                        self.update(player, Cell::Empty);
+                        self.update(new_position, Cell::Player(Powerup::Invincible(5)));
                     }
                     // everything else can not be passed
                     _ => {}
@@ -223,14 +239,14 @@ impl Level {
 
 fn level_1() -> Level {
     let mut level_data = Level::empty(4, 4);
-    level_data.update(Point { x: 0, y: 0 }, Cell::Player);
+    level_data.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
     level_data.update(Point { x: 3, y: 3 }, Cell::Exit);
     level_data
 }
 
 fn level_2() -> Level {
     let mut level_data = Level::empty(5, 5);
-    level_data.update(Point { x: 0, y: 4 }, Cell::Player);
+    level_data.update(Point { x: 0, y: 4 }, Cell::Player(Powerup::None));
 
     level_data.update(Point { x: 1, y: 1 }, Cell::VerticalWall);
     level_data.update(Point { x: 1, y: 2 }, Cell::VerticalWall);
@@ -255,7 +271,7 @@ fn level_2() -> Level {
 fn level_3() -> Level {
     let mut level_data = Level::empty(8, 3);
     level_data.update(Point { x: 0, y: 0 }, Cell::Void);
-    level_data.update(Point { x: 0, y: 1 }, Cell::Player);
+    level_data.update(Point { x: 0, y: 1 }, Cell::Player(Powerup::None));
     level_data.update(Point { x: 0, y: 2 }, Cell::Void);
 
     level_data.update(Point { x: 1, y: 0 }, Cell::Void);
@@ -370,7 +386,7 @@ fn level_4() -> Level {
         Point { x: 5, y: 21 },
         Cell::OneWayTeleporter(Point { x: 30, y: 0 }),
     );
-    level_data.update(Point { x: 24, y: 4 }, Cell::Player);
+    level_data.update(Point { x: 24, y: 4 }, Cell::Player(Powerup::None));
     level_data.update(Point { x: 30, y: 23 }, Cell::Exit);
     level_data
 }
@@ -483,7 +499,7 @@ fn level_5() -> Level {
     l.update(Point { x: 3, y: 9 }, Cell::HorizontalWall);
     l.update(Point { x: 4, y: 9 }, Cell::HorizontalWall);
     l.update(Point { x: 5, y: 9 }, Cell::VerticalWall);
-    l.update(Point { x: 6, y: 9 }, Cell::Player);
+    l.update(Point { x: 6, y: 9 }, Cell::Player(Powerup::None));
     l.update(Point { x: 7, y: 9 }, Cell::HorizontalWall);
     l.update(Point { x: 8, y: 9 }, Cell::HorizontalWall);
     l.update(Point { x: 9, y: 9 }, Cell::HorizontalWall);
