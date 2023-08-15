@@ -241,7 +241,7 @@ impl Level {
                 self.update(new_position, new_player_struct)
             }
             // else, handle normal movement
-            _ => self.move_player_regular(player, new_position, player_struct),
+            _ => self.move_player_regular(player, new_position, new_player_struct),
         }
     }
 
