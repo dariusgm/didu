@@ -205,12 +205,17 @@ impl Level {
                     Cell::OneWayTeleporter(destination_point) => {
                         self.update(player, Cell::Empty);
                         self.update(new_position, Cell::Empty);
-                        self.update(destination_point, player_struct)
+                        self.update(destination_point, player_struct);
                     }
                     //Triggering Invincibility Candy
                     Cell::Invincibility => {
                         self.update(player, Cell::Empty);
                         self.update(new_position, Cell::Player(Powerup::Invincible(5)));
+                    }
+                    // Move over breakable ground. Replace with Void.
+                    Cell::BreakableGround => {
+                        self.update(player, Cell::Void);
+                        self.update(new_position, player_struct);
                     }
                     // everything else can not be passed
                     _ => {}
@@ -751,7 +756,28 @@ impl Drawing {
                 Cell::Empty => {
                     queue!(self.stdout, SetForegroundColor(Color::Blue), Print("."))?;
                 }
-                Cell::Player => {
+                Cell::Player(Powerup::None) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"))?;
+                }
+                Cell::Player(Powerup::Invincible(5)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("5"))?;
+                }
+                Cell::Player(Powerup::Invincible(4)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("4"))?;
+                }
+                Cell::Player(Powerup::Invincible(3)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("3"))?;
+                }
+                Cell::Player(Powerup::Invincible(2)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("2"))?;
+                }
+                Cell::Player(Powerup::Invincible(1)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("1"))?;
+                }
+                Cell::Player(Powerup::Invincible(0)) => {
+                    queue!(self.stdout, SetForegroundColor(Color::Red), Print("0"))?;
+                }
+                Cell::Player(Powerup::Invincible(_)) => {
                     queue!(self.stdout, SetForegroundColor(Color::Red), Print("@"))?;
                 }
                 Cell::Exit => {
