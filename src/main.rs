@@ -114,6 +114,8 @@ impl Level {
                         self.update(point, Cell::Empty);
                         self.update(target_point, cell)
                     }
+                    // player will eat us
+                    Some(Cell::Player(Powerup::Invincible(_))) => self.update(point, Cell::Empty),
                     // rotate enemy for the following cases without moving it.
                     Some(Cell::VerticalWall) => {
                         self.update(point, Cell::CounterClockwiseEnemy(target_rotation));
@@ -174,6 +176,75 @@ impl Level {
         None
     }
 
+    fn move_player_regular(&mut self, player: Point, new_position: Point, player_struct: Cell) {
+        // Handle collosions here that will not reset the level
+        if let Some(cell) = self.data.get(&new_position).cloned() {
+            match cell {
+                // moved on empty space
+                Cell::Empty => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, player_struct);
+                }
+
+                // Triggering a switch removes the switch and the related door
+                Cell::Switch(switch_id) => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, player_struct);
+                    if let Some(door_position) = self.door_position(switch_id) {
+                        self.update(door_position, Cell::Empty);
+                    }
+                }
+                // Triggering a teleporter, moves me to the destination
+                Cell::OneWayTeleporter(destination_point) => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, Cell::Empty);
+                    self.update(destination_point, player_struct);
+                }
+                //Triggering Invincibility Candy
+                Cell::Invincibility => {
+                    self.update(player, Cell::Empty);
+                    self.update(new_position, Cell::Player(Powerup::Invincible(5)));
+                }
+                // Move over breakable ground. Replace with Void.
+                Cell::BreakableGround => {
+                    self.update(player, Cell::Void);
+                    self.update(new_position, player_struct);
+                }
+                // everything else can not be passed
+                _ => {}
+            }
+        }
+    }
+
+    fn move_player_invincible(&mut self, player: Point, new_position: Point, player_struct: Cell) {
+        // we are invincible for the amount of "moves".
+        // This allows us to eat enemies.
+        // And to run over void.
+
+        let new_player_struct = match player_struct {
+            Cell::Player(Powerup::Invincible(0)) => Cell::Player(Powerup::None),
+            Cell::Player(Powerup::Invincible(moves)) => {
+                Cell::Player(Powerup::Invincible(moves - 1))
+            }
+            _ => Cell::Player(Powerup::None),
+        };
+        let target_cell = self.data.get(&new_position).cloned().unwrap();
+        match target_cell {
+            // We can run over void in invincibility
+            Cell::Void => {
+                self.update(player, Cell::Empty);
+                self.update(new_position, new_player_struct);
+            }
+            // we can remove enemies
+            Cell::CounterClockwiseEnemy(_) => {
+                self.update(player, Cell::Empty);
+                self.update(new_position, new_player_struct)
+            }
+            // else, handle normal movement
+            _ => self.move_player_regular(player, new_position, player_struct),
+        }
+    }
+
     fn move_player(&mut self, player: Point, new_position: Point, max_x: i8, max_y: i8) {
         // Handle out of bounds
         if new_position.x >= 0
@@ -181,49 +252,19 @@ impl Level {
             && new_position.y >= 0
             && new_position.y <= max_y
         {
-            // get current player state
             let player_struct = self.data.get(&player).cloned().unwrap();
-
-            // Handle collosions here that will not reset the level
-            if let Some(cell) = self.data.get(&new_position).cloned() {
-                match cell {
-                    // moved on empty space
-                    Cell::Empty => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, player_struct);
-                    }
-
-                    // Triggering a switch removes the switch and the related door
-                    Cell::Switch(switch_id) => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, player_struct);
-                        if let Some(door_position) = self.door_position(switch_id) {
-                            self.update(door_position, Cell::Empty);
-                        }
-                    }
-                    // Triggering a teleporter, moves me to the destination
-                    Cell::OneWayTeleporter(destination_point) => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Empty);
-                        self.update(destination_point, player_struct);
-                    }
-                    //Triggering Invincibility Candy
-                    Cell::Invincibility => {
-                        self.update(player, Cell::Empty);
-                        self.update(new_position, Cell::Player(Powerup::Invincible(5)));
-                    }
-                    // Move over breakable ground. Replace with Void.
-                    Cell::BreakableGround => {
-                        self.update(player, Cell::Void);
-                        self.update(new_position, player_struct);
-                    }
-                    // everything else can not be passed
-                    _ => {}
+            match player_struct {
+                Cell::Player(Powerup::None) => {
+                    self.move_player_regular(player, new_position, player_struct)
                 }
+                Cell::Player(Powerup::Invincible(_)) => {
+                    self.move_player_invincible(player, new_position, player_struct)
+                }
+
+                _ => {}
             }
-        } else {
-            // moved to invalid position, ignoring
         }
+        // get current player state
     }
 
     fn size(&self) -> (i8, i8) {
