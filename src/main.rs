@@ -995,14 +995,23 @@ fn main() -> Result<()> {
                                     timing.push(level_start.elapsed().as_millis());
                                 }
                             }
-                            // check if player lost
-                            if let Some(&cell) = cloned_level.data.get(&new_position) {
-                                match cell {
-                                    Cell::CounterClockwiseEnemy(_) => restart = true,
-                                    Cell::Void => restart = true,
+
+                            if let Some(&player_cell) = cloned_level.data.get(&point) {
+                                match player_cell {
+                                    Cell::Player(Powerup::None) => {
+                                        if let Some(&cell) = cloned_level.data.get(&new_position) {
+                                            match cell {
+                                                Cell::CounterClockwiseEnemy(_) => restart = true,
+                                                Cell::Void => restart = true,
+                                                _ => {}
+                                            }
+                                        }
+                                    }
+                                    // Using powerup, no checks here
                                     _ => {}
                                 }
                             }
+                            // check if player lost
                             cloned_level.move_player(*point, new_position, max_x, max_y);
                         }
                     }
