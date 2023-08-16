@@ -444,10 +444,10 @@ fn level_5() -> Level {
         Point { x: 0, y: 0 },
         Cell::CounterClockwiseEnemy(Direction::Right),
     );
-    l.update(Point { x: 7, y: 0 }, Cell::Switch(0));
+    l.update(Point { x: 7, y: 0 }, Cell::Switch(3));
     l.update(Point { x: 8, y: 0 }, Cell::VerticalWall);
     l.update(Point { x: 9, y: 0 }, Cell::Void);
-    l.update(Point { x: 11, y: 0 }, Cell::Door(0));
+    l.update(Point { x: 11, y: 0 }, Cell::Door(1));
 
     l.update(Point { x: 0, y: 1 }, Cell::HorizontalWall);
     l.update(Point { x: 1, y: 1 }, Cell::HorizontalWall);
@@ -467,10 +467,10 @@ fn level_5() -> Level {
     l.update(Point { x: 8, y: 2 }, Cell::VerticalWall);
     l.update(Point { x: 9, y: 2 }, Cell::Void);
     l.update(Point { x: 11, y: 2 }, Cell::VerticalWall);
-    l.update(Point { x: 12, y: 2 }, Cell::Switch(0));
+    l.update(Point { x: 12, y: 2 }, Cell::Switch(1));
 
     l.update(Point { x: 0, y: 3 }, Cell::HorizontalWall);
-    l.update(Point { x: 1, y: 3 }, Cell::Door(0));
+    l.update(Point { x: 1, y: 3 }, Cell::Door(2));
     l.update(Point { x: 2, y: 3 }, Cell::HorizontalWall);
     l.update(Point { x: 3, y: 3 }, Cell::HorizontalWall);
     l.update(Point { x: 4, y: 3 }, Cell::HorizontalWall);
@@ -491,7 +491,7 @@ fn level_5() -> Level {
 
     l.update(Point { x: 5, y: 4 }, Cell::Void);
     l.update(Point { x: 6, y: 4 }, Cell::VerticalWall);
-    l.update(Point { x: 7, y: 4 }, Cell::Switch(0));
+    l.update(Point { x: 7, y: 4 }, Cell::Switch(2));
     l.update(Point { x: 8, y: 4 }, Cell::VerticalWall);
     l.update(Point { x: 9, y: 4 }, Cell::Void);
     l.update(Point { x: 11, y: 4 }, Cell::VerticalWall);
@@ -510,8 +510,8 @@ fn level_5() -> Level {
         Cell::CounterClockwiseEnemy(Direction::Down),
     );
 
-    l.update(Point { x: 2, y: 6 }, Cell::Switch(0));
-    l.update(Point { x: 3, y: 6 }, Cell::Switch(0));
+    l.update(Point { x: 2, y: 6 }, Cell::Switch(4));
+    l.update(Point { x: 3, y: 6 }, Cell::Switch(5));
     l.update(Point { x: 8, y: 6 }, Cell::VerticalWall);
     l.update(Point { x: 9, y: 6 }, Cell::Void);
     l.update(Point { x: 10, y: 6 }, Cell::Invincibility);
@@ -521,10 +521,10 @@ fn level_5() -> Level {
         Cell::CounterClockwiseEnemy(Direction::Up),
     );
 
-    l.update(Point { x: 2, y: 7 }, Cell::Switch(0));
-    l.update(Point { x: 3, y: 7 }, Cell::Switch(0));
+    l.update(Point { x: 2, y: 7 }, Cell::Switch(6));
+    l.update(Point { x: 3, y: 7 }, Cell::Switch(7));
     l.update(Point { x: 5, y: 7 }, Cell::VerticalWall);
-    l.update(Point { x: 6, y: 7 }, Cell::Door(0));
+    l.update(Point { x: 6, y: 7 }, Cell::Door(3));
     l.update(Point { x: 7, y: 7 }, Cell::HorizontalWall);
     l.update(Point { x: 8, y: 7 }, Cell::HorizontalWall);
     l.update(Point { x: 9, y: 7 }, Cell::HorizontalWall);
@@ -554,8 +554,8 @@ fn level_5() -> Level {
     l.update(Point { x: 12, y: 9 }, Cell::HorizontalWall);
 
     l.update(Point { x: 3, y: 10 }, Cell::Invincibility);
-    l.update(Point { x: 5, y: 10 }, Cell::Door(0));
-    l.update(Point { x: 7, y: 10 }, Cell::Door(0));
+    l.update(Point { x: 5, y: 10 }, Cell::Door(4));
+    l.update(Point { x: 7, y: 10 }, Cell::Door(5));
     l.update(
         Point { x: 12, y: 10 },
         Cell::OneWayTeleporter(Point { x: 0, y: 0 }),
@@ -567,7 +567,7 @@ fn level_5() -> Level {
     l.update(Point { x: 3, y: 11 }, Cell::HorizontalWall);
     l.update(Point { x: 4, y: 11 }, Cell::HorizontalWall);
     l.update(Point { x: 5, y: 11 }, Cell::HorizontalWall);
-    l.update(Point { x: 6, y: 11 }, Cell::Door(0));
+    l.update(Point { x: 6, y: 11 }, Cell::Door(6));
     l.update(Point { x: 7, y: 11 }, Cell::HorizontalWall);
     l.update(Point { x: 8, y: 11 }, Cell::HorizontalWall);
     l.update(Point { x: 9, y: 11 }, Cell::HorizontalWall);
