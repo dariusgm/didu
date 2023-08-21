@@ -16,12 +16,8 @@ mod utils;
 use std::{collections::HashMap, io::Stdout, time::Duration};
 use std::{io::Write, time::Instant};
 use utils::direction::Direction;
+use utils::powerup::Powerup;
 
-#[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
-enum Powerup {
-    None,
-    Invincible(u8),
-}
 #[derive(Clone, PartialEq, Copy, Eq, Hash)]
 enum Cell {
     Empty,
