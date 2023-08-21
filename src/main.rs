@@ -16,8 +16,8 @@ mod utils;
 use std::{collections::HashMap, io::Stdout, time::Duration};
 use std::{io::Write, time::Instant};
 use utils::direction::Direction;
+use utils::point::Point;
 use utils::powerup::Powerup;
-
 #[derive(Clone, PartialEq, Copy, Eq, Hash)]
 enum Cell {
     Empty,
@@ -32,12 +32,6 @@ enum Cell {
     OneWayTeleporter(Point),
     BreakableGround,
     Invincibility,
-}
-
-#[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
-struct Point {
-    x: i8,
-    y: i8,
 }
 
 #[derive(Clone)]
