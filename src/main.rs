@@ -11,16 +11,11 @@ use crossterm::{
     terminal::{self, Clear, ClearType},
     ExecutableCommand, Result,
 };
+
+mod utils;
 use std::{collections::HashMap, io::Stdout, time::Duration};
 use std::{io::Write, time::Instant};
-
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
-enum Direction {
-    Up,
-    Down,
-    Right,
-    Left,
-}
+use utils::direction::Direction;
 
 #[derive(Clone, PartialEq, Copy, Eq, Hash, Debug)]
 enum Powerup {
