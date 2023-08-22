@@ -241,3 +241,16 @@ impl Level {
         (max_x, max_y)
     }
 }
+#[test]
+fn test_empty() {
+    let level = Level::empty(2, 2);
+    for x in 0..2 {
+        for y in 0..2 {
+            if let Some(&c) = level.data.get(&Point { x, y }) {
+                assert!(c == Cell::Empty)
+            } else {
+                assert!(false)
+            }
+        }
+    }
+}
