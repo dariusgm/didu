@@ -4,18 +4,13 @@ use crate::utils::powerup::Powerup;
 use crossterm::{
     cursor,
     cursor::MoveTo,
-    event::poll as poll_event,
-    event::read as read_event,
-    event::Event as Event_,
-    event::KeyCode as KeyCode_,
     queue,
     style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
-    terminal::enable_raw_mode,
     terminal::{self, Clear, ClearType},
     ExecutableCommand, Result,
 };
-use std::{io::Stdout, time::Duration};
-use std::{io::Write, time::Instant};
+use std::{io::Stdout};
+use std::{io::Write};
 
 #[derive(Debug)]
 pub(crate) struct Drawing {
