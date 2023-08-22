@@ -130,19 +130,15 @@ fn main() -> Result<()> {
                                 }
                             }
 
-                            if let Some(&player_cell) = cloned_level.data.get(&point) {
-                                match player_cell {
-                                    Cell::Player(Powerup::None) => {
-                                        if let Some(&cell) = cloned_level.data.get(&new_position) {
-                                            match cell {
-                                                Cell::CounterClockwiseEnemy(_) => restart = true,
-                                                Cell::Void => restart = true,
-                                                _ => {}
-                                            }
+                            if let Some(&player_cell) = cloned_level.data.get(point) {
+                                if let Cell::Player(Powerup::None) = player_cell {
+                                    if let Some(&cell) = cloned_level.data.get(&new_position) {
+                                        match cell {
+                                            Cell::CounterClockwiseEnemy(_) => restart = true,
+                                            Cell::Void => restart = true,
+                                            _ => {}
                                         }
                                     }
-                                    // Using powerup, no checks here
-                                    _ => {}
                                 }
                             }
                             // check if player lost
