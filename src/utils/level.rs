@@ -130,7 +130,7 @@ impl Level {
         None
     }
 
-    pub fn move_player_regular(&mut self, player: Point, new_position: Point, player_struct: Cell) {
+    fn move_player_regular(&mut self, player: Point, new_position: Point, player_struct: Cell) {
         // Handle collosions here that will not reset the level
         if let Some(cell) = self.data.get(&new_position).cloned() {
             match cell {
@@ -170,12 +170,7 @@ impl Level {
         }
     }
 
-    pub fn move_player_invincible(
-        &mut self,
-        player: Point,
-        new_position: Point,
-        player_struct: Cell,
-    ) {
+    fn move_player_invincible(&mut self, player: Point, new_position: Point, player_struct: Cell) {
         // we are invincible for the amount of "moves".
         // This allows us to eat enemies.
         // And to run over void.
@@ -253,4 +248,13 @@ fn test_empty() {
             }
         }
     }
+}
+#[test]
+fn test_size() {
+    let level = Level::empty(3, 2);
+    let tuple = level.size();
+    let max_x = tuple.0;
+    let max_y = tuple.1;
+    assert_eq!(max_x, 2);
+    assert_eq!(max_y, 1);
 }
