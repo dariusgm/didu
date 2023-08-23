@@ -218,7 +218,6 @@ impl Level {
                 _ => {}
             }
         }
-        // get current player state
     }
 
     pub fn size(&self) -> (i8, i8) {
@@ -266,5 +265,33 @@ fn test_finish_position() {
     level.update(Point { x: 1, y: 1 }, Cell::Exit);
     if let Some(finish_point) = level.finish_position() {
         assert_eq!(finish_point, Point { x: 1, y: 1 });
+    } else {
+        assert!(false);
     }
+}
+
+#[test]
+fn test_finish_position_missing() {
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    assert_eq!(level.finish_position(), None)
+}
+
+#[test]
+fn test_player_position() {
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    if let Some(playerpoint) = level.player_position() {
+        assert_eq!(playerpoint, Point { x: 0, y: 0 });
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_player_position_missing() {
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    assert_eq!(level.player_position(), None)
 }
