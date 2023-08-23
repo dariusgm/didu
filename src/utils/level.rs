@@ -258,3 +258,13 @@ fn test_size() {
     assert_eq!(max_x, 2);
     assert_eq!(max_y, 1);
 }
+
+#[test]
+fn test_finish_position() {
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    if let Some(finish_point) = level.finish_position() {
+        assert_eq!(finish_point, Point { x: 1, y: 1 });
+    }
+}
