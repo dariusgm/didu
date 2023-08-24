@@ -19,9 +19,21 @@ You can download it here: [rust-lang.org](https://www.rust-lang.org/tools/instal
 
 After the installation, you can run it using:
 ```bash
+cargo install cargo-tarpaulin
 cargo run
 ```
 
+# Tests
+```bash
+cargo test
+```
+
+# Test coverage
+```bash
+cargo install cargo-tarpaulin
+cargo tarpaulin --out Xml
+
+```
 You may need to close the terminal after the game is finished.
 
 # Game mechanics

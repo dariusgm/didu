@@ -307,7 +307,6 @@ fn test_move_player_out_of_left_bound() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -323,7 +322,6 @@ fn test_move_player_out_of_right_bound() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -339,7 +337,6 @@ fn test_move_player_out_of_lower_bound() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -356,7 +353,6 @@ fn test_move_player_regular_right() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -372,7 +368,6 @@ fn test_move_player_regular_left() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -389,7 +384,6 @@ fn test_move_player_regular_down() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -405,7 +399,6 @@ fn test_move_player_regular_up() {
             Cell::Player(Powerup::None) => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
     } else {
         assert!(false);
     }
@@ -424,7 +417,144 @@ fn test_move_on_breakable_ground() {
             Cell::Void => assert!(true),
             _ => assert!(false),
         }
-        assert!(true);
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_move_on_invincibility_candy() {
+    // @.  -->  ..
+    // oX       5X
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    level.update(Point { x: 0, y: 1 }, Cell::Invincibility);
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+        match player {
+            Cell::Player(Powerup::Invincible(5)) => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_move_invincibility_candy_finish() {
+    // @.  -->  ..
+    // oX       5X
+    let mut level = Level::empty(2, 2);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(0)));
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+        match player {
+            Cell::Player(Powerup::None) => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_move_on_oneway_teleporter() {
+    // @..  -->  ...
+    // TX.       .X.
+    // ...       ..@
+    let mut level = Level::empty(3, 3);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    level.update(
+        Point { x: 0, y: 1 },
+        Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
+    );
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+    // Test teleporter removed
+    if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
+        match previous_teleporter {
+            Cell::Empty => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+    // Test Player position
+    if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
+        match player {
+            Cell::Player(Powerup::None) => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_move_on_oneway_teleporter_when_invincible() {
+    // @..  -->  ...
+    // TX.       .X.
+    // ...       ..@
+    let mut level = Level::empty(3, 3);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+    level.update(
+        Point { x: 0, y: 1 },
+        Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
+    );
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+    // Test teleporter removed
+    if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
+        match previous_teleporter {
+            Cell::Empty => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+    // Test Player position
+    if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
+        match player {
+            Cell::Player(Powerup::Invincible(4)) => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+}
+
+#[test]
+fn test_move_on_switch() {
+    // @..  -->  ...
+    // SX.       @X.
+    // .D.       ...
+    let mut level = Level::empty(3, 3);
+    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+    level.update(Point { x: 0, y: 1 }, Cell::Switch(1));
+    level.update(Point { x: 1, y: 2 }, Cell::Door(1));
+    level.update(Point { x: 1, y: 1 }, Cell::Exit);
+    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+    // Test Door removed
+    if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
+        match previous_door {
+            Cell::Empty => assert!(true),
+            _ => assert!(false),
+        }
+    } else {
+        assert!(false);
+    }
+    //
+    // Test Player position
+    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+        match player {
+            Cell::Player(Powerup::None) => assert!(true),
+            _ => assert!(false),
+        }
     } else {
         assert!(false);
     }
