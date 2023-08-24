@@ -1,3 +1,5 @@
+[![Rust Build](https://github.com/dariusgm/didu/actions/workflows/rust.yml/badge.svg)](https://github.com/dariusgm/didu/actions/workflows/rust.yml)
+
 # didu
 Diamand Duo is a 2D ascii based termial game.
 

@@ -24,18 +24,12 @@ jobs:
         toolchain: ${{ matrix.rust }}
         profile: minimal
         override: true
+
     - name: Test
       uses: actions-rs/cargo@v1
       with:
         command: test
 
-    - name: Build
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
-
-    
     - name: Install Tarpaulin (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: cargo install cargo-tarpaulin
@@ -50,6 +44,12 @@ jobs:
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./target/tarpaulin/report.xml
+
+    - name: Build
+      uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --release
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
