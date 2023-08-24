@@ -43,7 +43,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         token: ${{secrets.CODECOV_TOKEN}}
-        file: ./target/tarpaulin/report.xml
+        file: ./cobertura.xml
 
     - name: Build
       uses: actions-rs/cargo@v1
