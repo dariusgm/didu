@@ -235,327 +235,331 @@ impl Level {
         (max_x, max_y)
     }
 }
-#[test]
-fn test_empty() {
-    let level = Level::empty(2, 2);
-    for x in 0..2 {
-        for y in 0..2 {
-            if let Some(&c) = level.data.get(&Point { x, y }) {
-                assert!(c == Cell::Empty)
-            } else {
-                assert!(false)
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_empty() {
+        let level = Level::empty(2, 2);
+        for x in 0..2 {
+            for y in 0..2 {
+                if let Some(&c) = level.data.get(&Point { x, y }) {
+                    assert!(c == Cell::Empty)
+                } else {
+                    assert!(false)
+                }
             }
         }
     }
-}
-#[test]
-fn test_size() {
-    let level = Level::empty(3, 2);
-    let tuple = level.size();
-    let max_x = tuple.0;
-    let max_y = tuple.1;
-    assert_eq!(max_x, 2);
-    assert_eq!(max_y, 1);
-}
+    #[test]
+    fn test_size() {
+        let level = Level::empty(3, 2);
+        let tuple = level.size();
+        let max_x = tuple.0;
+        let max_y = tuple.1;
+        assert_eq!(max_x, 2);
+        assert_eq!(max_y, 1);
+    }
 
-#[test]
-fn test_finish_position() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    if let Some(finish_point) = level.finish_position() {
-        assert_eq!(finish_point, Point { x: 1, y: 1 });
-    } else {
-        assert!(false);
+    #[test]
+    fn test_finish_position() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        if let Some(finish_point) = level.finish_position() {
+            assert_eq!(finish_point, Point { x: 1, y: 1 });
+        } else {
+            assert!(false);
+        }
     }
-}
 
-#[test]
-fn test_finish_position_missing() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    assert_eq!(level.finish_position(), None)
-}
+    #[test]
+    fn test_finish_position_missing() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        assert_eq!(level.finish_position(), None)
+    }
 
-#[test]
-fn test_player_position() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    if let Some(playerpoint) = level.player_position() {
-        assert_eq!(playerpoint, Point { x: 0, y: 0 });
-    } else {
-        assert!(false);
+    #[test]
+    fn test_player_position() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        if let Some(playerpoint) = level.player_position() {
+            assert_eq!(playerpoint, Point { x: 0, y: 0 });
+        } else {
+            assert!(false);
+        }
     }
-}
 
-#[test]
-fn test_player_position_missing() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    assert_eq!(level.player_position(), None)
-}
+    #[test]
+    fn test_player_position_missing() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        assert_eq!(level.player_position(), None)
+    }
 
-#[test]
-fn test_move_player_out_of_left_bound() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: -1, y: 0 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_out_of_left_bound() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: -1, y: 0 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
-#[test]
-fn test_move_player_out_of_right_bound() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 2, y: 0 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_out_of_right_bound() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 2, y: 0 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
-#[test]
-fn test_move_player_out_of_lower_bound() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 2 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_out_of_lower_bound() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 2 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_player_regular_right() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_regular_right() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
-#[test]
-fn test_move_player_regular_left() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 0, y: 0 }, Cell::Exit);
-    level.move_player(Point { x: 1, y: 1 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_regular_left() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 0, y: 0 }, Cell::Exit);
+        level.move_player(Point { x: 1, y: 1 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_player_regular_down() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_regular_down() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
-#[test]
-fn test_move_player_regular_up() {
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 0, y: 0 }, Cell::Exit);
-    level.move_player(Point { x: 1, y: 1 }, Point { x: 1, y: 0 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 1, y: 0 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_player_regular_up() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 0, y: 0 }, Cell::Exit);
+        level.move_player(Point { x: 1, y: 1 }, Point { x: 1, y: 0 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 1, y: 0 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
-#[test]
-fn test_move_on_breakable_ground() {
-    // @.  -->  V.
-    // ?X       @X
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 0, y: 1 }, Cell::BreakableGround);
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-        match player {
-            Cell::Void => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_on_breakable_ground() {
+        // @.  -->  V.
+        // ?X       @X
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 0, y: 1 }, Cell::BreakableGround);
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
+            match player {
+                Cell::Void => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_on_invincibility_candy() {
-    // @.  -->  ..
-    // oX       5X
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 0, y: 1 }, Cell::Invincibility);
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::Invincible(5)) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_on_invincibility_candy() {
+        // @.  -->  ..
+        // oX       5X
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 0, y: 1 }, Cell::Invincibility);
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::Invincible(5)) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_invincibility_candy_finish() {
-    // @.  -->  ..
-    // oX       5X
-    let mut level = Level::empty(2, 2);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(0)));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+    #[test]
+    fn test_move_invincibility_candy_finish() {
+        // @.  -->  ..
+        // oX       5X
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(0)));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_on_oneway_teleporter() {
-    // @..  -->  ...
-    // TX.       .X.
-    // ...       ..@
-    let mut level = Level::empty(3, 3);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(
-        Point { x: 0, y: 1 },
-        Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
-    );
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+    #[test]
+    fn test_move_on_oneway_teleporter() {
+        // @..  -->  ...
+        // TX.       .X.
+        // ...       ..@
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
+        );
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
-    // Test teleporter removed
-    if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
-        match previous_teleporter {
-            Cell::Empty => assert!(true),
-            _ => assert!(false),
+        // Test teleporter removed
+        if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
+            match previous_teleporter {
+                Cell::Empty => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
     }
-    // Test Player position
-    if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
-        }
-    } else {
-        assert!(false);
-    }
-}
 
-#[test]
-fn test_move_on_oneway_teleporter_when_invincible() {
-    // @..  -->  ...
-    // TX.       .X.
-    // ...       ..@
-    let mut level = Level::empty(3, 3);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
-    level.update(
-        Point { x: 0, y: 1 },
-        Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
-    );
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+    #[test]
+    fn test_move_on_oneway_teleporter_when_invincible() {
+        // @..  -->  ...
+        // TX.       .X.
+        // ...       ..@
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::OneWayTeleporter(Point { x: 2, y: 2 }),
+        );
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
-    // Test teleporter removed
-    if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
-        match previous_teleporter {
-            Cell::Empty => assert!(true),
-            _ => assert!(false),
+        // Test teleporter removed
+        if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
+            match previous_teleporter {
+                Cell::Empty => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
-    }
-    // Test Player position
-    if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
-        match player {
-            Cell::Player(Powerup::Invincible(4)) => assert!(true),
-            _ => assert!(false),
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
+            match player {
+                Cell::Player(Powerup::Invincible(4)) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
-}
 
-#[test]
-fn test_move_on_switch() {
-    // @..  -->  ...
-    // SX.       @X.
-    // .D.       ...
-    let mut level = Level::empty(3, 3);
-    level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
-    level.update(Point { x: 0, y: 1 }, Cell::Switch(1));
-    level.update(Point { x: 1, y: 2 }, Cell::Door(1));
-    level.update(Point { x: 1, y: 1 }, Cell::Exit);
-    level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+    #[test]
+    fn test_move_on_switch() {
+        // @..  -->  ...
+        // SX.       @X.
+        // .D.       ...
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 0, y: 1 }, Cell::Switch(1));
+        level.update(Point { x: 1, y: 2 }, Cell::Door(1));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
-    // Test Door removed
-    if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
-        match previous_door {
-            Cell::Empty => assert!(true),
-            _ => assert!(false),
+        // Test Door removed
+        if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
+            match previous_door {
+                Cell::Empty => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
-    }
-    //
-    // Test Player position
-    if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-        match player {
-            Cell::Player(Powerup::None) => assert!(true),
-            _ => assert!(false),
+        //
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::None) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
         }
-    } else {
-        assert!(false);
     }
 }
