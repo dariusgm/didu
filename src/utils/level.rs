@@ -291,6 +291,17 @@ mod tests {
             assert!(false);
         }
     }
+    #[test]
+    fn test_player_invincible_position() {
+        let mut level = Level::empty(2, 2);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(1)));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        if let Some(playerpoint) = level.player_position() {
+            assert_eq!(playerpoint, Point { x: 0, y: 0 });
+        } else {
+            assert!(false);
+        }
+    }
 
     #[test]
     fn test_player_position_missing() {
@@ -560,6 +571,252 @@ mod tests {
             }
         } else {
             assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_move_as_invinciblle_on_switch() {
+        // 5..  -->  ...
+        // SX.       @X.
+        // .D.       ...
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+        level.update(Point { x: 0, y: 1 }, Cell::Switch(1));
+        level.update(Point { x: 1, y: 2 }, Cell::Door(1));
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+        // Test Door removed
+        if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
+            match previous_door {
+                Cell::Empty => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
+        //
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::Invincible(4)) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_move_as_invinciblle_on_void() {
+        // 5..  -->  ...
+        // VX.       4X.
+        // ...       ...
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+        level.update(Point { x: 0, y: 1 }, Cell::Void);
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::Invincible(4)) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
+
+        // Test Void Position
+        if let Some(void) = level.data.get(&Point { x: 0, y: 0 }) {
+            match void {
+                Cell::Empty => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
+    }
+    #[test]
+    fn test_move_as_invinciblle_on_enemy() {
+        // 5..  -->  ...
+        // §X.       4X.
+        // ...       ...
+        let mut level = Level::empty(3, 3);
+        level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::CounterClockwiseEnemy(Direction::Up),
+        );
+        level.update(Point { x: 1, y: 1 }, Cell::Exit);
+        level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
+
+        // Test Player position
+        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
+            match player {
+                Cell::Player(Powerup::Invincible(4)) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false);
+        }
+    }
+
+    #[test]
+    fn test_update_enemies_move_up() {
+        // ...  -->  §..
+        // §..       ...
+        // ...       ...
+        let mut level = Level::empty(3, 3);
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::CounterClockwiseEnemy(Direction::Up),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Up) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_enemies_move_down() {
+        // ...  -->  ...
+        // §..       ...
+        // ...       §..
+        let mut level = Level::empty(3, 3);
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::CounterClockwiseEnemy(Direction::Down),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 0, y: 2 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Down) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_enemies_move_right() {
+        // §..  -->  .§.
+        // ...       ...
+        // ...       ...
+        let mut level = Level::empty(3, 3);
+        level.update(
+            Point { x: 0, y: 0 },
+            Cell::CounterClockwiseEnemy(Direction::Right),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 1, y: 0 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Right) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_enemies_move_left() {
+        // .§.  -->  §..
+        // ...       ...
+        // ...       ...
+        let mut level = Level::empty(3, 3);
+        level.update(
+            Point { x: 1, y: 0 },
+            Cell::CounterClockwiseEnemy(Direction::Left),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Left) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_counterclockwise_to_up() {
+        // ..  -->  ..
+        // .§       .§
+        let mut level = Level::empty(2, 2);
+        level.update(
+            Point { x: 1, y: 1 },
+            Cell::CounterClockwiseEnemy(Direction::Right),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 1, y: 1 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Up) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_counterclockwise_to_left() {
+        // .§  -->  .§
+        // ..       ..
+        let mut level = Level::empty(2, 2);
+        level.update(
+            Point { x: 1, y: 0 },
+            Cell::CounterClockwiseEnemy(Direction::Up),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 1, y: 0 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Left) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_counterclockwise_to_down() {
+        // §.  -->  §.
+        // ..       ..
+        let mut level = Level::empty(2, 2);
+        level.update(
+            Point { x: 0, y: 0 },
+            Cell::CounterClockwiseEnemy(Direction::Left),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Down) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
+        }
+    }
+    #[test]
+    fn test_update_counterclockwise_to_right() {
+        // ..  -->  ..
+        // §.       §.
+        let mut level = Level::empty(2, 2);
+        level.update(
+            Point { x: 0, y: 1 },
+            Cell::CounterClockwiseEnemy(Direction::Down),
+        );
+        level.update_enemies();
+        if let Some(enemy) = level.data.get(&Point { x: 0, y: 1 }) {
+            match enemy {
+                Cell::CounterClockwiseEnemy(Direction::Right) => assert!(true),
+                _ => assert!(false),
+            }
+        } else {
+            assert!(false)
         }
     }
 }
