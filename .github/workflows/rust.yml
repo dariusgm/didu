@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         rust: [stable]
 
     steps:
@@ -51,8 +51,16 @@ jobs:
         command: build
         args: --release
 
-    - name: Upload artifact
+    - name: Upload artifact for unix systems
+      if: matrix.os != 'windows-latest'
       uses: actions/upload-artifact@v2
       with:
         name: ${{ matrix.os }}-executable
         path: target/release/didu
+
+    - name: Upload artifact for windows systems
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.os }}-executable
+        path: target/release/didu.exe
