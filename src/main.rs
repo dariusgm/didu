@@ -1,6 +1,5 @@
 use crossterm::{
-    event::poll as poll_event, event::read as read_event, event::Event as Event_,
-    event::KeyCode as KeyCode_, terminal::enable_raw_mode, Result,
+    event::poll, event::read, event::Event, event::KeyCode, terminal::enable_raw_mode, Result,
 };
 
 mod levels;
@@ -29,6 +28,9 @@ fn main() -> Result<()> {
     // for each level, clone the level into the buffer for modification.
     // Run than the game loop
     for (level_index, level) in levels.iter().enumerate() {
+        if terminate {
+            continue;
+        }
         let mut cloned_level = level.clone();
 
         let (max_x, max_y) = level.size();
@@ -48,9 +50,6 @@ fn main() -> Result<()> {
                 last_enemy_move = Instant::now();
             }
 
-            if terminate {
-                continue;
-            }
             drawing.draw_level(&cloned_level)?;
             drawing.draw_ui(
                 level_index + 1,
@@ -66,40 +65,42 @@ fn main() -> Result<()> {
 
             match player_point {
                 Some(point) => {
-                    if poll_event(Duration::from_millis(100))? {
-                        if let Event_::Key(event) = read_event()? {
+                    if poll(Duration::from_millis(100))? {
+                        if let Event::Key(event) = read()? {
                             let new_position = match event.code {
-                                KeyCode_::Up => Point {
+                                KeyCode::Up => Point {
                                     x: point.x,
                                     y: point.y - 1,
                                 },
-                                KeyCode_::Down => Point {
+                                KeyCode::Down => Point {
                                     x: point.x,
                                     y: point.y + 1,
                                 },
-                                KeyCode_::Left => Point {
+                                KeyCode::Left => Point {
                                     x: point.x - 1,
                                     y: point.y,
                                 },
-                                KeyCode_::Right => Point {
+                                KeyCode::Right => Point {
                                     x: point.x + 1,
                                     y: point.y,
                                 },
-                                KeyCode_::Esc => {
+                                KeyCode::Esc => {
                                     terminate = true;
+                                    run = false;
                                     Point {
                                         x: point.x,
                                         y: point.y,
                                     }
                                 }
-                                KeyCode_::Char('q') => {
+                                KeyCode::Char('q') => {
                                     terminate = true;
+                                    run = false;
                                     Point {
                                         x: point.x,
                                         y: point.y,
                                     }
                                 }
-                                KeyCode_::Char('r') => {
+                                KeyCode::Char('r') => {
                                     restart = true;
                                     Point {
                                         x: point.x,
@@ -107,7 +108,7 @@ fn main() -> Result<()> {
                                     }
                                 }
 
-                                KeyCode_::Char('h') => {
+                                KeyCode::Char('h') => {
                                     draw_help = !draw_help;
                                     Point {
                                         x: point.x,
@@ -160,6 +161,8 @@ fn main() -> Result<()> {
     }
     drawing.reset()?;
     drawing.flush()?;
-    drawing.show_timing(timing)?;
+    if timing.len() > 0 {
+        drawing.show_timing(timing)?;
+    }
     Ok(())
 }
