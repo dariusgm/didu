@@ -21,7 +21,6 @@ You can download it here: [rust-lang.org](https://www.rust-lang.org/tools/instal
 
 After the installation, you can run it using:
 ```bash
-cargo install cargo-tarpaulin
 cargo run
 ```
 
