@@ -6,6 +6,7 @@ mod levels;
 mod utils;
 
 use levels::all;
+use std::io::stdout;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -17,7 +18,7 @@ use utils::powerup::Powerup;
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
-    let mut drawing = Drawing::new();
+    let mut drawing = Drawing::new(stdout());
     let levels = all::levels();
 
     drawing.init()?;

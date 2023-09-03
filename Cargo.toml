@@ -7,3 +7,6 @@ edition = "2021"
 
 [dependencies]
 crossterm = "0.26.1"
+
+[dev-dependencies]
+regex = "1.9.5"

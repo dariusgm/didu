@@ -9,19 +9,16 @@ use crossterm::{
     terminal::{self, Clear, ClearType},
     ExecutableCommand, Result,
 };
-use std::{io::Stdout};
-use std::{io::Write};
+use std::io::Write;
 
 #[derive(Debug)]
-pub(crate) struct Drawing {
-    stdout: Stdout,
+pub(crate) struct Drawing<W: Write> {
+    stdout: W,
 }
 
-impl Drawing {
-    pub(crate) fn new() -> Self {
-        Drawing {
-            stdout: std::io::stdout(),
-        }
+impl<W: Write> Drawing<W> {
+    pub(crate) fn new(stdout: W) -> Self {
+        Drawing { stdout }
     }
     pub(crate) fn show_timing(&mut self, timing: Vec<u128>) -> Result<()> {
         queue!(self.stdout, MoveTo(0, 0), Print("Level | Time in ms"))?;
@@ -230,6 +227,46 @@ impl Drawing {
             queue!(self.stdout, ResetColor)?;
         }
         self.stdout.flush()?; // Flush the queued commands
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Drawing;
+    use crossterm::Result;
+    use regex::Regex;
+    fn strip_ansi_codes(s: &str) -> String {
+        let re = Regex::new(r"\x1b\[\d*(;\d*)*[a-zA-Z]").unwrap();
+        re.replace_all(s, "").to_string()
+    }
+
+    #[test]
+    fn test_show_timing() -> Result<()> {
+        // Prepare a buffer to capture the output
+        let mut buffer = Vec::new();
+
+        // Initialize the Drawing object with the buffer
+        let mut drawing = Drawing::new(&mut buffer);
+
+        // Data to be passed to the show_timing method for testing
+        let timing_data = vec![100, 200, 300];
+
+        // Call the method to be tested
+        drawing.show_timing(timing_data)?;
+
+        // Convert the buffer to a String to verify its contents
+        let output = String::from_utf8(buffer).unwrap();
+
+        // Remove Ascii
+        let escaped_output = strip_ansi_codes(&output);
+
+        // Expected output based on the timing_data
+        let expected_output = "Level | Time in ms0 | 100\n1 | 200\n2 | 300\n";
+
+        // Assert that the method works as expected
+        assert_eq!(escaped_output, expected_output);
+
         Ok(())
     }
 }
