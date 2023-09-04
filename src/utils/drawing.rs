@@ -1,6 +1,7 @@
 use crate::utils::cell::Cell;
 use crate::utils::level::Level;
 use crate::utils::powerup::Powerup;
+use crate::Point;
 use crossterm::{
     cursor,
     cursor::MoveTo,
@@ -138,7 +139,10 @@ impl<W: Write> Drawing<W> {
 
     pub(crate) fn draw_level(&mut self, level: &Level) -> Result<()> {
         queue!(self.stdout, Clear(ClearType::All))?;
-        for (point, cell) in level.data.iter() {
+        let mut keys: Vec<&Point> = level.data.keys().collect();
+        keys.sort();
+        for point in keys {
+            let cell = level.data.get(point).unwrap();
             queue!(self.stdout, MoveTo(point.x as u16, point.y as u16))?;
             match cell {
                 Cell::Empty => {
@@ -233,7 +237,12 @@ impl<W: Write> Drawing<W> {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::level::Level;
+
+    use super::Cell;
     use super::Drawing;
+    use super::Powerup;
+    use crate::Point;
     use crossterm::Result;
     use regex::Regex;
     fn strip_ansi_codes(s: &str) -> String {
@@ -242,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn test_show_timing() -> Result<()> {
+    fn show_timing() -> Result<()> {
         // Prepare a buffer to capture the output
         let mut buffer = Vec::new();
 
@@ -268,5 +277,46 @@ mod tests {
         assert_eq!(escaped_output, expected_output);
 
         Ok(())
+    }
+
+    #[test]
+    fn flush() {
+        let buffer = Vec::new();
+        let mut drawing = Drawing::new(buffer);
+        let _ = drawing.flush();
+        assert!(true);
+    }
+
+    #[test]
+    fn init() {
+        let buffer = Vec::new();
+        let mut drawing = Drawing::new(buffer);
+        let _ = drawing.init();
+        assert!(true);
+    }
+
+    #[test]
+    fn drawing_level_1() {
+        let mut level = Level::empty(5, 1);
+        level.update(Point { x: 0, y: 0 }, Cell::Empty);
+        level.update(Point { x: 1, y: 0 }, Cell::Player(Powerup::None));
+        level.update(Point { x: 2, y: 0 }, Cell::Exit);
+        level.update(Point { x: 3, y: 0 }, Cell::HorizontalWall);
+        level.update(Point { x: 4, y: 0 }, Cell::VerticalWall);
+
+        let mut buffer = Vec::new();
+        let mut drawing = Drawing::new(&mut buffer);
+        let _ = drawing.draw_level(&level);
+        let _ = drawing.flush();
+        let output = String::from_utf8(buffer).unwrap();
+
+        // Remove Ascii
+        let escaped_output = strip_ansi_codes(&output);
+
+        // Expected output based on the timing_data
+        let expected_output = ".@X-|";
+
+        // Assert that the method works as expected
+        assert_eq!(escaped_output, expected_output);
     }
 }
