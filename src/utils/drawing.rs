@@ -237,6 +237,7 @@ impl<W: Write> Drawing<W> {
 
 #[cfg(test)]
 mod tests {
+    use crate::utils::direction::Direction;
     use crate::utils::level::Level;
 
     use super::Cell;
@@ -296,14 +297,37 @@ mod tests {
     }
 
     #[test]
-    fn drawing_level_1() {
-        let mut level = Level::empty(5, 1);
+    fn drawing_level_items() {
+        let mut level = Level::empty(1, 1);
         level.update(Point { x: 0, y: 0 }, Cell::Empty);
         level.update(Point { x: 1, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 2, y: 0 }, Cell::Exit);
         level.update(Point { x: 3, y: 0 }, Cell::HorizontalWall);
         level.update(Point { x: 4, y: 0 }, Cell::VerticalWall);
+        level.update(Point { x: 5, y: 0 }, Cell::Void);
+        level.update(Point { x: 6, y: 0 }, Cell::Door(1));
+        level.update(Point { x: 7, y: 0 }, Cell::Switch(1));
+        level.update(Point { x: 8, y: 0 }, Cell::Invincibility);
+        level.update(Point { x: 9, y: 0 }, Cell::BreakableGround);
 
+        level.update(
+            Point { x: 10, y: 0 },
+            Cell::OneWayTeleporter(Point { x: 0, y: 0 }),
+        );
+
+        level.update(
+            Point { x: 11, y: 0 },
+            Cell::CounterClockwiseEnemy(Direction::Up),
+        );
+
+        level.update(Point { x: 12, y: 0 }, Cell::Player(Powerup::Invincible(5)));
+
+        level.update(Point { x: 13, y: 0 }, Cell::Player(Powerup::Invincible(4)));
+        level.update(Point { x: 14, y: 0 }, Cell::Player(Powerup::Invincible(3)));
+        level.update(Point { x: 15, y: 0 }, Cell::Player(Powerup::Invincible(2)));
+        level.update(Point { x: 16, y: 0 }, Cell::Player(Powerup::Invincible(1)));
+        level.update(Point { x: 17, y: 0 }, Cell::Player(Powerup::Invincible(0)));
+        level.update(Point { x: 18, y: 0 }, Cell::Player(Powerup::Invincible(6)));
         let mut buffer = Vec::new();
         let mut drawing = Drawing::new(&mut buffer);
         let _ = drawing.draw_level(&level);
@@ -314,7 +338,7 @@ mod tests {
         let escaped_output = strip_ansi_codes(&output);
 
         // Expected output based on the timing_data
-        let expected_output = ".@X-|";
+        let expected_output = ".@X-| DSo?T§543210@";
 
         // Assert that the method works as expected
         assert_eq!(escaped_output, expected_output);
