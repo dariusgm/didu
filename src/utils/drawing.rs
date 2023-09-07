@@ -237,6 +237,8 @@ impl<W: Write> Drawing<W> {
 
 #[cfg(test)]
 mod tests {
+    use std::time::Instant;
+
     use crate::utils::direction::Direction;
     use crate::utils::level::Level;
 
@@ -357,5 +359,17 @@ mod tests {
         for cell_type in cell_types {
             assert!(escaped_output.contains(cell_type))
         }
+    }
+
+    #[test]
+    fn draw_ui() {
+        let mut buffer = Vec::new();
+        let mut drawing = Drawing::new(&mut buffer);
+        let _ = drawing.draw_ui(1, 123456, 5);
+        let _ = drawing.flush();
+        let output = String::from_utf8(buffer).unwrap();
+        let escaped_output = strip_ansi_codes(&output);
+        let expected_output = "Level: 1, Time: 123456, h = toggle help";
+        assert_eq!(escaped_output, expected_output);
     }
 }
