@@ -237,7 +237,6 @@ impl<W: Write> Drawing<W> {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Instant;
 
     use crate::utils::direction::Direction;
     use crate::utils::level::Level;
