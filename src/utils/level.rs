@@ -246,7 +246,7 @@ mod tests {
                 if let Some(&c) = level.data.get(&Point { x, y }) {
                     assert!(c == Cell::Empty)
                 } else {
-                    assert!(false)
+                    panic!("Test failed")
                 }
             }
         }
@@ -269,7 +269,7 @@ mod tests {
         if let Some(finish_point) = level.finish_position() {
             assert_eq!(finish_point, Point { x: 1, y: 1 });
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -288,7 +288,7 @@ mod tests {
         if let Some(playerpoint) = level.player_position() {
             assert_eq!(playerpoint, Point { x: 0, y: 0 });
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -299,7 +299,7 @@ mod tests {
         if let Some(playerpoint) = level.player_position() {
             assert_eq!(playerpoint, Point { x: 0, y: 0 });
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -316,13 +316,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: -1, y: 0 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -331,13 +327,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 2, y: 0 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -346,13 +338,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 2 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -362,13 +350,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -377,13 +361,9 @@ mod tests {
         level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
         level.update(Point { x: 0, y: 0 }, Cell::Exit);
         level.move_player(Point { x: 1, y: 1 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -393,13 +373,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::None));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -408,13 +384,9 @@ mod tests {
         level.update(Point { x: 1, y: 1 }, Cell::Player(Powerup::None));
         level.update(Point { x: 0, y: 0 }, Cell::Exit);
         level.move_player(Point { x: 1, y: 1 }, Point { x: 1, y: 0 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 1, y: 0 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 1, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -426,13 +398,9 @@ mod tests {
         level.update(Point { x: 0, y: 1 }, Cell::BreakableGround);
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 0 }) {
-            match player {
-                Cell::Void => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Void) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -445,13 +413,9 @@ mod tests {
         level.update(Point { x: 0, y: 1 }, Cell::Invincibility);
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::Invincible(5)) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::Invincible(5))) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -463,13 +427,9 @@ mod tests {
         level.update(Point { x: 0, y: 0 }, Cell::Player(Powerup::Invincible(0)));
         level.update(Point { x: 1, y: 1 }, Cell::Exit);
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -488,22 +448,14 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test teleporter removed
-        if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
-            match previous_teleporter {
-                Cell::Empty => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Empty) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 2, y: 2 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -522,22 +474,14 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test teleporter removed
-        if let Some(previous_teleporter) = level.data.get(&Point { x: 0, y: 1 }) {
-            match previous_teleporter {
-                Cell::Empty => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Empty) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 2, y: 2 }) {
-            match player {
-                Cell::Player(Powerup::Invincible(4)) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::Invincible(4))) = level.data.get(&Point { x: 2, y: 2 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -554,23 +498,15 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test Door removed
-        if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
-            match previous_door {
-                Cell::Empty => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Empty) = level.data.get(&Point { x: 1, y: 2 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
         //
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::None) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::None)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -587,23 +523,15 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test Door removed
-        if let Some(previous_door) = level.data.get(&Point { x: 1, y: 2 }) {
-            match previous_door {
-                Cell::Empty => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Empty) = level.data.get(&Point { x: 1, y: 2 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
         //
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::Invincible(4)) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::Invincible(4))) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -619,23 +547,15 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::Invincible(4)) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::Invincible(4))) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
 
         // Test Void Position
-        if let Some(void) = level.data.get(&Point { x: 0, y: 0 }) {
-            match void {
-                Cell::Empty => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Empty) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
     #[test]
@@ -653,13 +573,9 @@ mod tests {
         level.move_player(Point { x: 0, y: 0 }, Point { x: 0, y: 1 }, 1, 1);
 
         // Test Player position
-        if let Some(player) = level.data.get(&Point { x: 0, y: 1 }) {
-            match player {
-                Cell::Player(Powerup::Invincible(4)) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::Player(Powerup::Invincible(4))) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false);
+            panic!("Test failed");
         }
     }
 
@@ -674,13 +590,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Up),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Up) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false)
+            panic!("Test failed");
         }
     }
     #[test]
@@ -694,13 +606,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Down),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 0, y: 2 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Down) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) = level.data.get(&Point { x: 0, y: 2 }) {
         } else {
-            assert!(false)
+            panic!("Test failed");
         }
     }
     #[test]
@@ -714,13 +622,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Right),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 1, y: 0 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Right) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) = level.data.get(&Point { x: 1, y: 0 }) {
         } else {
-            assert!(false)
+            panic!("Test failed");
         }
     }
     #[test]
@@ -734,13 +638,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Left),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Left) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false)
+            panic!("Test failed");
         }
     }
     #[test]
@@ -753,13 +653,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Right),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 1, y: 1 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Up) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) = level.data.get(&Point { x: 1, y: 1 }) {
         } else {
-            assert!(false)
+            panic!("Test failed")
         }
     }
     #[test]
@@ -772,13 +668,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Up),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 1, y: 0 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Left) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) = level.data.get(&Point { x: 1, y: 0 }) {
         } else {
-            assert!(false)
+            panic!("Test failed")
         }
     }
     #[test]
@@ -791,13 +683,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Left),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 0, y: 0 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Down) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) = level.data.get(&Point { x: 0, y: 0 }) {
         } else {
-            assert!(false)
+            panic!("Test failed")
         }
     }
     #[test]
@@ -810,13 +698,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Down),
         );
         level.update_enemies();
-        if let Some(enemy) = level.data.get(&Point { x: 0, y: 1 }) {
-            match enemy {
-                Cell::CounterClockwiseEnemy(Direction::Right) => assert!(true),
-                _ => assert!(false),
-            }
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) = level.data.get(&Point { x: 0, y: 1 }) {
         } else {
-            assert!(false)
+            panic!("Test failed")
         }
     }
 }

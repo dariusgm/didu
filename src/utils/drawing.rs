@@ -285,16 +285,16 @@ mod tests {
     fn flush() {
         let buffer = Vec::new();
         let mut drawing = Drawing::new(buffer);
-        let _ = drawing.flush();
-        assert!(true);
+        let result = drawing.flush();
+        assert_eq!(result.ok(), Some(()));
     }
 
     #[test]
     fn init() {
         let buffer = Vec::new();
         let mut drawing = Drawing::new(buffer);
-        let _ = drawing.init();
-        assert!(true);
+        let result = drawing.init();
+        assert_eq!(result.ok(), Some(()));
     }
 
     #[test]

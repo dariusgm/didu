@@ -1,6 +1,6 @@
-use crossterm::event::KeyEvent;
+
 use crossterm::{
-    event::poll, event::read, event::Event, event::KeyCode, terminal::enable_raw_mode, Result,
+    event::poll, event::read, event::Event, terminal::enable_raw_mode, Result,
 };
 
 mod levels;
@@ -16,153 +16,7 @@ use utils::drawing::Drawing;
 
 use utils::point::Point;
 use utils::powerup::Powerup;
-
-struct GameState {
-    event: Option<KeyEvent>,
-    // terminates the entire game
-    terminate: bool,
-    // responsible for game loop
-    run: bool,
-    // draw help overlay
-    help: bool,
-    // current player position or new point, depending on the context
-    point: Point,
-    // restarts the current level
-    restart: bool,
-}
-
-impl GameState {
-    fn new() -> Self {
-        GameState {
-            event: None,
-            terminate: false,
-            run: true,
-            restart: false,
-            help: false,
-            point: Point { x: 0, y: 0 },
-        }
-    }
-    fn is_terminate(&self) -> bool {
-        self.terminate
-    }
-
-    fn is_run(&self) -> bool {
-        self.run
-    }
-
-    fn is_help(&self) -> bool {
-        self.help
-    }
-
-    fn running(&self) -> Self {
-        GameState {
-            event: self.event,
-            terminate: false,
-            run: true,
-            help: false,
-            point: Point { x: 0, y: 0 },
-            restart: self.restart,
-        }
-    }
-
-    fn new_point(&self, point: Point) -> Self {
-        GameState {
-            event: self.event,
-            terminate: self.terminate,
-            run: self.run,
-            point: point,
-            help: self.help,
-            restart: self.restart,
-        }
-    }
-    fn restart(&self) -> Self {
-        GameState {
-            event: self.event,
-            terminate: self.terminate,
-            run: true,
-            help: self.help,
-            point: self.point,
-            restart: true,
-        }
-    }
-
-    fn help(&self) -> Self {
-        GameState {
-            event: self.event,
-            terminate: self.terminate,
-            run: self.run,
-            point: self.point,
-            help: !self.help,
-            restart: self.restart,
-        }
-    }
-
-    fn terminate(&self) -> Self {
-        GameState {
-            event: self.event,
-            terminate: true,
-            run: false,
-            point: self.point,
-            help: self.help,
-            restart: false,
-        }
-    }
-
-    fn stop(&self) -> Self {
-        GameState {
-            event: self.event,
-            terminate: self.terminate,
-            run: false,
-            point: self.point,
-            help: self.help,
-            restart: self.restart,
-        }
-    }
-    fn is_restart(&self) -> bool {
-        self.restart
-    }
-
-    // check if finished
-    fn is_finish(&self, finish_position: Option<Point>) -> bool {
-        if let Some(finish) = finish_position {
-            finish.x == self.point.x && finish.y == self.point.y
-        } else {
-            false
-        }
-    }
-
-    // Update movement and global game state
-    fn update_player_position(&self, event: KeyEvent) -> GameState {
-        let point = self.point;
-        match event.code {
-            KeyCode::Up => self.new_point(Point {
-                x: point.x,
-                y: point.y - 1,
-            }),
-            KeyCode::Down => self.new_point(Point {
-                x: point.x,
-                y: point.y + 1,
-            }),
-            KeyCode::Left => self.new_point(Point {
-                x: point.x - 1,
-                y: point.y,
-            }),
-            KeyCode::Right => self.new_point(Point {
-                x: point.x + 1,
-                y: point.y,
-            }),
-            KeyCode::Esc => self.terminate(),
-            KeyCode::Char('q') => self.terminate(),
-            KeyCode::Char('r') => self.restart(),
-
-            KeyCode::Char('h') => self.help(),
-            _ => self.new_point(Point {
-                x: point.x,
-                y: point.y,
-            }),
-        }
-    }
-}
+use utils::game_state::GameState;
 
 fn main() -> Result<()> {
     enable_raw_mode()?;
@@ -217,7 +71,7 @@ fn main() -> Result<()> {
                     if let Event::Key(event) = read()? {
                         // This is the position the player wants to move
                         game_state = game_state.update_player_position(event);
-                        let new_position = game_state.point;
+                        let new_position = game_state.point();
 
                         if game_state.is_finish(level.finish_position()) {
                             game_state = game_state.stop();
@@ -238,7 +92,7 @@ fn main() -> Result<()> {
                         }
                         // update player position on the instance of the current level
                         // here we do the validation and handle all the allowed moves.
-                        cloned_level.move_player(*point, new_position.clone(), max_x, max_y);
+                        cloned_level.move_player(*point, new_position, max_x, max_y);
                         // now we need to sync back the player position to the game state.
                         // Maybe we move this somewhere else...
                         if let Some(moved_player_position) = cloned_level.player_position() {
