@@ -1,7 +1,7 @@
 use crate::utils::point::Point;
 
-use crossterm::event::KeyEvent;
 use crossterm::event::KeyCode;
+use crossterm::event::KeyEvent;
 
 pub struct GameState {
     event: Option<KeyEvent>,
@@ -153,4 +153,152 @@ impl GameState {
         }
     }
 }
+#[cfg(test)]
+mod tests {
 
+    use super::GameState;
+    use super::Point;
+    use crossterm::event::KeyCode;
+    use crossterm::event::KeyEvent;
+    use crossterm::event::KeyModifiers;
+    #[test]
+    fn new() {
+        let game_state = GameState::new();
+        assert_eq!(game_state.point.x, 0);
+        assert_eq!(game_state.point.y, 0);
+        assert_eq!(game_state.event, None);
+        assert!(game_state.is_run());
+        assert!(!game_state.is_help());
+        assert!(!game_state.is_restart());
+        assert!(!game_state.is_terminate());
+        assert!(game_state.is_finish(Some(Point { x: 0, y: 0 })));
+        assert!(!game_state.is_finish(None));
+    }
+    #[test]
+    fn move_up() {
+        let event = KeyEvent::new(KeyCode::Up, KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert_eq!(new_state.point.x, 0);
+        assert_eq!(new_state.point.y, -1);
+    }
+    #[test]
+    fn move_right() {
+        let event = KeyEvent::new(KeyCode::Right, KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert_eq!(new_state.point.x, 1);
+        assert_eq!(new_state.point.y, 0);
+    }
+    #[test]
+    fn move_left() {
+        let event = KeyEvent::new(KeyCode::Left, KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert_eq!(new_state.point.x, -1);
+        assert_eq!(new_state.point.y, 0);
+    }
+    #[test]
+    fn move_down() {
+        let event = KeyEvent::new(KeyCode::Down, KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert_eq!(new_state.point.x, 0);
+        assert_eq!(new_state.point.y, 1);
+    }
+    #[test]
+    fn escape_game() {
+        let event = KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert!(new_state.terminate);
+    }
+
+    #[test]
+    fn q_game() {
+        let event = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert!(new_state.terminate);
+    }
+    #[test]
+    fn restart_game() {
+        let event = KeyEvent::new(KeyCode::Char('r'), KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert!(new_state.is_restart());
+    }
+    #[test]
+    fn help() {
+        let event = KeyEvent::new(KeyCode::Char('h'), KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert!(new_state.is_help());
+    }
+    #[test]
+    fn to_running_state() {
+        let game_state = GameState::new();
+        let new_state = game_state.running();
+        assert_eq!(new_state.event, game_state.event);
+        assert_eq!(new_state.terminate, false);
+        assert_eq!(new_state.run, true);
+        assert_eq!(new_state.help, false);
+        assert_eq!(new_state.point, Point { x: 0, y: 0 });
+        assert_eq!(new_state.restart, game_state.restart);
+    }
+
+    #[test]
+    fn to_restart_state() {
+        let game_state = GameState::new();
+        let new_state = game_state.restart();
+        assert_eq!(new_state.event, game_state.event);
+        assert_eq!(new_state.terminate, game_state.terminate);
+        assert_eq!(new_state.run, true);
+        assert_eq!(new_state.help, game_state.help);
+        assert_eq!(new_state.point, game_state.point);
+        assert_eq!(new_state.restart, true);
+    }
+    #[test]
+    fn to_help_state() {
+        let game_state = GameState::new();
+        let new_state = game_state.help();
+        assert_eq!(new_state.event, game_state.event);
+        assert_eq!(new_state.terminate, game_state.terminate);
+        assert_eq!(new_state.run, game_state.run);
+        assert_eq!(!new_state.help, game_state.help);
+        assert_eq!(new_state.point, game_state.point);
+        assert_eq!(new_state.restart, game_state.restart);
+    }
+
+    #[test]
+    fn to_terminate_state() {
+        let game_state = GameState::new();
+        let new_state = game_state.terminate();
+        assert_eq!(new_state.event, game_state.event);
+        assert_eq!(new_state.terminate, true);
+        assert_eq!(new_state.run, false);
+        assert_eq!(new_state.help, game_state.help);
+        assert_eq!(new_state.point, game_state.point);
+        assert_eq!(new_state.restart, false);
+    }
+
+    #[test]
+    fn to_stop_state() {
+        let game_state = GameState::new();
+        let new_state = game_state.stop();
+        assert_eq!(new_state.event, game_state.event);
+        assert_eq!(new_state.terminate, game_state.terminate);
+        assert_eq!(new_state.run, false);
+        assert_eq!(new_state.help, game_state.help);
+        assert_eq!(new_state.point, game_state.point);
+        assert_eq!(new_state.restart, game_state.restart);
+    }
+}
