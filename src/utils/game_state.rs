@@ -244,6 +244,17 @@ mod tests {
         assert!(new_state.is_help());
     }
     #[test]
+    fn any_unbound_key() {
+        let event = KeyEvent::new(KeyCode::Char('a'), KeyModifiers::NONE);
+        let game_state = GameState::new();
+
+        let new_state = game_state.update_player_position(event);
+        assert_eq!(new_state.is_help(), game_state.is_help());
+        assert_eq!(new_state.is_restart(), game_state.is_restart());
+        assert_eq!(new_state.is_terminate(), game_state.is_terminate());
+        assert_eq!(new_state.is_run(), game_state.is_run());
+    }
+    #[test]
     fn to_running_state() {
         let game_state = GameState::new();
         let new_state = game_state.running();
