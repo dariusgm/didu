@@ -1,7 +1,4 @@
-
-use crossterm::{
-    event::poll, event::read, event::Event, terminal::enable_raw_mode, Result,
-};
+use crossterm::{event::poll, event::read, event::Event, terminal::enable_raw_mode, Result};
 
 mod levels;
 mod utils;
@@ -10,24 +7,24 @@ use levels::all;
 use std::io::stdout;
 use std::time::Duration;
 use std::time::Instant;
+use utils::level::Level;
 
 use utils::cell::Cell;
 use utils::drawing::Drawing;
 
+use std::io::Write;
+use utils::game_state::GameState;
 use utils::point::Point;
 use utils::powerup::Powerup;
-use utils::game_state::GameState;
 
-fn main() -> Result<()> {
-    enable_raw_mode()?;
-    let mut drawing = Drawing::new(stdout());
-    let mut game_state = GameState::new();
-    let levels = all::levels();
-
+fn game_loop(
+    mut drawing: Drawing<impl Write>,
+    mut game_state: GameState,
+    levels: Vec<Level>,
+    mut timing: Vec<u128>,
+) -> Result<()> {
     drawing.init()?;
 
-    // Store the duration for each level to later show it to the plaer
-    let mut timing: Vec<u128> = vec![];
     // for each level, clone the level into the buffer for modification.
     // Than run the game loop
     for (level_index, level) in levels.iter().enumerate() {
@@ -119,4 +116,14 @@ fn main() -> Result<()> {
         drawing.show_timing(timing)?;
     }
     Ok(())
+}
+
+fn main() -> Result<()> {
+    enable_raw_mode()?;
+    let drawing = Drawing::new(stdout());
+    let game_state = GameState::new();
+    let levels = all::levels();
+    // Store the duration for each level to later show it to the plaer
+    let timing: Vec<u128> = vec![];
+    game_loop(drawing, game_state, levels, timing)
 }
