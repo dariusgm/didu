@@ -259,9 +259,9 @@ mod tests {
         let game_state = GameState::new();
         let new_state = game_state.running();
         assert_eq!(new_state.event, game_state.event);
-        assert_eq!(new_state.terminate, false);
-        assert_eq!(new_state.run, true);
-        assert_eq!(new_state.help, false);
+        assert!(!new_state.terminate);
+        assert!(new_state.run);
+        assert!(!new_state.help);
         assert_eq!(new_state.point, Point { x: 0, y: 0 });
         assert_eq!(new_state.restart, game_state.restart);
     }
@@ -272,10 +272,10 @@ mod tests {
         let new_state = game_state.restart();
         assert_eq!(new_state.event, game_state.event);
         assert_eq!(new_state.terminate, game_state.terminate);
-        assert_eq!(new_state.run, true);
+        assert!(new_state.run);
         assert_eq!(new_state.help, game_state.help);
         assert_eq!(new_state.point, game_state.point);
-        assert_eq!(new_state.restart, true);
+        assert!(new_state.restart);
     }
     #[test]
     fn to_help_state() {
@@ -294,11 +294,11 @@ mod tests {
         let game_state = GameState::new();
         let new_state = game_state.terminate();
         assert_eq!(new_state.event, game_state.event);
-        assert_eq!(new_state.terminate, true);
-        assert_eq!(new_state.run, false);
+        assert!(new_state.terminate);
+        assert!(!new_state.run);
         assert_eq!(new_state.help, game_state.help);
         assert_eq!(new_state.point, game_state.point);
-        assert_eq!(new_state.restart, false);
+        assert!(!new_state.restart);
     }
 
     #[test]
@@ -307,7 +307,7 @@ mod tests {
         let new_state = game_state.stop();
         assert_eq!(new_state.event, game_state.event);
         assert_eq!(new_state.terminate, game_state.terminate);
-        assert_eq!(new_state.run, false);
+        assert!(!new_state.run);
         assert_eq!(new_state.help, game_state.help);
         assert_eq!(new_state.point, game_state.point);
         assert_eq!(new_state.restart, game_state.restart);

@@ -590,7 +590,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Up),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) = level.data.get(&Point { x: 0, y: 0 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) =
+            level.data.get(&Point { x: 0, y: 0 })
+        {
         } else {
             panic!("Test failed");
         }
@@ -606,7 +608,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Down),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) = level.data.get(&Point { x: 0, y: 2 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) =
+            level.data.get(&Point { x: 0, y: 2 })
+        {
         } else {
             panic!("Test failed");
         }
@@ -622,7 +626,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Right),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) = level.data.get(&Point { x: 1, y: 0 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) =
+            level.data.get(&Point { x: 1, y: 0 })
+        {
         } else {
             panic!("Test failed");
         }
@@ -638,7 +644,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Left),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) = level.data.get(&Point { x: 0, y: 0 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) =
+            level.data.get(&Point { x: 0, y: 0 })
+        {
         } else {
             panic!("Test failed");
         }
@@ -653,7 +661,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Right),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) = level.data.get(&Point { x: 1, y: 1 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Up)) =
+            level.data.get(&Point { x: 1, y: 1 })
+        {
         } else {
             panic!("Test failed")
         }
@@ -668,7 +678,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Up),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) = level.data.get(&Point { x: 1, y: 0 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Left)) =
+            level.data.get(&Point { x: 1, y: 0 })
+        {
         } else {
             panic!("Test failed")
         }
@@ -683,7 +695,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Left),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) = level.data.get(&Point { x: 0, y: 0 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Down)) =
+            level.data.get(&Point { x: 0, y: 0 })
+        {
         } else {
             panic!("Test failed")
         }
@@ -698,7 +712,9 @@ mod tests {
             Cell::CounterClockwiseEnemy(Direction::Down),
         );
         level.update_enemies();
-        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) = level.data.get(&Point { x: 0, y: 1 }) {
+        if let Some(Cell::CounterClockwiseEnemy(Direction::Right)) =
+            level.data.get(&Point { x: 0, y: 1 })
+        {
         } else {
             panic!("Test failed")
         }
