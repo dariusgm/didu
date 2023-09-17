@@ -8,3 +8,34 @@ pub fn level_1() -> Level {
     level_data.update(Point { x: 3, y: 3 }, Cell::Exit);
     level_data
 }
+
+#[cfg(test)]
+mod tests {
+
+    use crate::levels::level_1::level_1;
+
+    use super::Cell;
+    use super::Powerup;
+    use crate::Point;
+
+    #[test]
+    fn cell_0_0() {
+        let level = level_1();
+        if let Some(Cell::Player(Powerup::None))  = level.data.get(&Point {x:0, y:0}) {
+
+        } else {
+            panic!("Test failed");
+        }
+
+    }
+    #[test]
+    fn cell_3_3() {
+        let level = level_1();
+        if let Some(Cell::Exit)  = level.data.get(&Point {x:3, y:3}) {
+
+        } else {
+            panic!("Test failed");
+        }
+    }
+
+}
