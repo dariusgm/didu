@@ -37,7 +37,7 @@ __CARGO_FIX_YOLO=1 cargo clippy --fix --allow-dirty --allow-staged
 # Test coverage
 ```bash
 cargo install cargo-tarpaulin
-cargo tarpaulin --out Xml
+cargo tarpaulin --out xml
 
 ```
 You may need to close the terminal after the game is finished.
