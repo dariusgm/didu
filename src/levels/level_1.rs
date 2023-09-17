@@ -18,6 +18,10 @@ mod tests {
     use super::Powerup;
     use crate::Point;
 
+
+// s/.*x:\s\(\d*\),\sy:\s\(\d*\).*\(Cell::.*\))/if let Some(\3) = level.data.get(\&Point {x: \1, y: \2}) {} else {panic!("Test failed");}
+
+
     #[test]
     fn cell_0_0() {
         let level = level_1();
