@@ -36,7 +36,7 @@ jobs:
 
     - name: Run Tarpaulin for code coverage (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
-      run: cargo tarpaulin --out Xml
+      run: cargo tarpaulin --out xml
 
     - name: Upload coverage to Codecov (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
